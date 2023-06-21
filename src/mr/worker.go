@@ -9,9 +9,16 @@ import "hash/fnv"
 //
 // Map functions return a slice of KeyValue.
 //
+
 type KeyValue struct {
 	Key   string
 	Value string
+}
+
+type Worker struct {
+	Mapf func(string, string) []KeyValue
+	Reducef func(string, []string) string
+	Task *Task
 }
 
 //
@@ -28,42 +35,121 @@ func ihash(key string) int {
 //
 // main/mrworker.go calls this function.
 //
+
 func Worker(mapf func(string, string) []KeyValue,
-	reducef func(string, []string) string) {
-
-	// Your worker implementation here.
-
-	// uncomment to send the Example RPC to the coordinator.
-	// CallExample()
-
+	reducef func(string, []string) string) { 
+	w := new (Worker)
+	w.Mapf = mapf
+	w.Reducef = reducef
+	w.RequestTask()
 }
 
-//
-// example function to show how to make an RPC call to the coordinator.
-//
-// the RPC argument and reply types are defined in rpc.go.
-//
-func CallExample() {
 
-	// declare an argument structure.
-	args := ExampleArgs{}
+func (w *Worker)RequestTask() {
+	requestTaskArgs := RequestTaskArgs{}
+	requestTaskReply := RequestTaskReply{}
+	endSignal := false
+	for !endSignal {
+		ok := call("Coordinator.AllocateTask", &requestTaskArgs, &requestTaskReply)
+		w.Task = requestTaskReply.Task
+		if ok {
+			if requestTaskReply.Wait {
+				sleep(1000)
+			} else {
+				if requestTaskReply.Task.TType == Map {
+					w.doMapTask()
+				} else if requestTaskReply.Task.TType == Reduce {
+					w.doReduceTask()
+				} else if requestTaskReply.Task.TType == Done {
+					endsignal = true
+				} 
+			}
+		} else {
+			fmt.Printf("call failed!\n , coordinator not responding")
+		} 
+	} 
+}
 
-	// fill in the argument(s).
-	args.X = 99
+func (w *Worker)doMapTask() {  
 
-	// declare a reply structure.
-	reply := ExampleReply{}
+	intermediate := [w.Task.nReduce][]mr.KeyValue{} 
+	file, err := os.Open(w.Task.FileName)
+	if err != nil {
+		log.Fatalf("cannot open %v", filename)
+	}
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalf("cannot read %v", filename)
+	}
+	file.Close()
+	kva := mapf(filename, string(content))
+	for _, kv := range kva {
+		kvIndex := ihash(kv.Key) % w.Task.nReduce
+		intermediate[kvIndex] = append(intermediate[kvIndex], kv)
+	}
 
-	// send the RPC request, wait for the reply.
-	// the "Coordinator.Example" tells the
-	// receiving server that we'd like to call
-	// the Example() method of struct Coordinator.
-	ok := call("Coordinator.Example", &args, &reply)
+	for i, inter := range intermediate {
+		//write into intermediate file
+		ifile,_ := os.create("mr-%d-%d",w,Task.TaskId,i)
+		enc := json.NewEncoder(ifile)
+		for _, kb := range inter {
+			err := enc.Encode(&kb)
+		}
+		ifile.Close()
+	} 
+	doneTaskArgs := DoneArgs{TaskId:w.Task.TaskId}
+	doneTaskReply := DoneReply{}
+	ok := call("Coordinator.DoneTask", &doneTaskArgs, &doneTaskReply)
 	if ok {
-		// reply.Y should be 100.
-		fmt.Printf("reply.Y %v\n", reply.Y)
+		fmt.Printf("done map task success!\n")
 	} else {
-		fmt.Printf("call failed!\n")
+		fmt.Printf("call failed!\n , coordinator not responding")
+	}
+}
+
+func (w *Worker) doReduceTask() {
+	var kva []KeyValue 
+	for i := 0; i < w.Task.NMap; i++ {
+		ifile, err := os.Open("mr-%d-%d",i,w.Task.TaskId)
+		dec := json.NewDecoder(file)
+		for {
+			var kv KeyValue
+			if err := dec.Decode(&kv); err != nil {
+				break
+			}
+			kva = append(kva, kv)
+		}
+	}
+	//sorting
+	sort.Sort(ByKey(intermediate))
+	//create output file
+	ofile, _ := os.Create("mr-out-%d",w.Task.TaskId)
+
+	i := 0
+	for i < len(intermediate) {
+		j := i + 1
+		for j < len(intermediate) && intermediate[j].Key == intermediate[i].Key {
+			j++
+		}
+		values := []string{}
+		for k := i; k < j; k++ {
+			values = append(values, intermediate[k].Value)
+		}
+		output := reducef(intermediate[i].Key, values)
+
+		// this is the correct format for each line of Reduce output.
+		fmt.Fprintf(ofile, "%v %v\n", intermediate[i].Key, output)
+
+		i = j
+	}
+	ofile.Close() 
+	doneTaskArgs := DoneArgs{TaskId:w.Task.TaskId}
+	doneTaskReply := DoneReply{}
+	ok := call("Coordinator.DoneTask", &doneTaskArgs, &doneTaskReply)
+	if ok {
+		fmt.Printf("done map task success!\n")
+	} else {
+		fmt.Printf("call failed!\n , coordinator not responding")
 	}
 }
 
