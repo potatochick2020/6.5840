@@ -8,8 +8,8 @@ import "net/http"
 import "time"
 
 type TaskTracker struct {
-	task id int 
-	start Time
+	taskId int 
+	start time.Time
 	Redistribute int 
 	status int // 0: not start; 1: in progress; 2: done
 }
