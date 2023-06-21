@@ -63,15 +63,15 @@ func (w *worker) RequestTask() {
 	for !endSignal {
 		//fmt.Printf("request task")
 		ok := call("Coordinator.AllocateTask", &requestTaskArgs, &requestTaskReply)
-		w.Task = requestTaskReply.Task
+		
 		if ok {
 			if requestTaskReply.wait {
 				time.Sleep(5 * time.Second)
-			} else {
+			} else { 
 				if requestTaskReply.Task.TType == Map {
-					w.doMapTask()
+					w.doMapTask(requestTaskReply.Task)
 				} else if requestTaskReply.Task.TType == Reduce {
-					w.doReduceTask()
+					w.doReduceTask(requestTaskReply.Task)
 				} else if requestTaskReply.Task.TType == Done {
 					endSignal = true
 				}
@@ -84,6 +84,7 @@ func (w *worker) RequestTask() {
 
 func (w *worker) doMapTask() {
 	fmt.Printf("received map task %d \n", w.Task.TaskId)
+	fmt.Printf("Task detail: %+v\n", w.Task)
 	intermediate := make([][]KeyValue, w.Task.NReduce)
 	file, err := os.Open(w.Task.FileName)
 	if err != nil {
@@ -121,6 +122,7 @@ func (w *worker) doMapTask() {
 
 func (w *worker) doReduceTask() {
 	fmt.Printf("received reduce task %d \n", w.Task.TaskId)
+	fmt.Printf("Task detail: %+v\n", w.Task)
 	var kva []KeyValue
 	for i := 0; i < w.Task.NMap; i++ {
 		filename := fmt.Sprintf("mr-%d-%d", i, w.Task.TaskId)

@@ -20,6 +20,7 @@ type RequestTaskReply struct {
 }
 
 type DoneArgs struct {
+	TType TaskType
 	TaskId int // if map task, the it mean finish create all intermediate files, if reduce task, it mean finish create the final output file.
 }
 
