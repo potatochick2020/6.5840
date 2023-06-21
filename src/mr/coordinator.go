@@ -7,6 +7,7 @@ import (
 	"net/rpc"
 	"os"
 	"time"
+	"fmt"
 )
 
 type TaskTracker struct {
@@ -28,9 +29,12 @@ type Coordinator struct {
 // the RPC argument and reply types are defined in rpc.go.
 
 func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskReply) error {
+	//fmt.Printf("%+v\n", c)
 	if c.phase == 0 {
 		for i := 0; i < c.nMap; i++ {
+			fmt.Printf("Task %d: %+v\n", i,  c.taskTrackers[i])
 			if c.taskTrackers[i].status == 0 {
+				reply.wait = false
 				reply.Task = new(Task)
 				reply.Task.TType = Map
 				reply.Task.TaskId = i
@@ -39,12 +43,17 @@ func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskRepl
 				reply.Task.FileName = c.files[i]
 				c.taskTrackers[i].start = time.Now()
 				c.taskTrackers[i].status = 1
+				fmt.Printf("allocate map task %d \n", reply.Task.TaskId)
+				fmt.Printf("%+v\n", reply)
+				fmt.Printf("%+v\n", reply.Task)
+				
 				return nil
 			}
 		}
 		//check is all done, some form of heart beat
 		for i := 0; i < c.nMap; i++ {
 			if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
+				fmt.Printf("Redistribute Task %d", i)
 				c.taskTrackers[i].Redistribute++
 				c.taskTrackers[i].start = time.Now()
 				c.taskTrackers[i].status = 0
@@ -58,6 +67,7 @@ func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskRepl
 		c.taskTrackers = make([]TaskTracker, c.nReduce)
 	} else if c.phase == 1 {
 		for i := 0; i < c.nReduce; i++ {
+			reply.wait = false
 			reply.Task = new(Task)
 			reply.Task.TType = Reduce
 			reply.Task.TaskId = i
@@ -127,7 +137,7 @@ func MakeCoordinator(files []string, nReduce int) *Coordinator {
 	c := Coordinator{}
 	c.nMap = len(files)
 	c.nReduce = nReduce
-	c.phase = 1
+	c.phase = 0
 	// Your code here.
 	c.files = files
 	if c.nMap > c.nReduce {

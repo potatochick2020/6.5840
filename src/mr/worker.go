@@ -59,12 +59,14 @@ func (w *worker) RequestTask() {
 	requestTaskArgs := RequestTaskArgs{}
 	requestTaskReply := RequestTaskReply{}
 	endSignal := false
+	
 	for !endSignal {
+		fmt.Printf("request task")
 		ok := call("Coordinator.AllocateTask", &requestTaskArgs, &requestTaskReply)
 		w.Task = requestTaskReply.Task
 		if ok {
 			if requestTaskReply.wait {
-				time.Sleep(1 * time.Second)
+				time.Sleep(5 * time.Second)
 			} else {
 				if requestTaskReply.Task.TType == Map {
 					w.doMapTask()
@@ -81,7 +83,7 @@ func (w *worker) RequestTask() {
 }
 
 func (w *worker) doMapTask() {
-
+	fmt.Printf("received map task %d", w.Task.TaskId)
 	intermediate := make([][]KeyValue, w.Task.NReduce)
 	file, err := os.Open(w.Task.FileName)
 	if err != nil {
@@ -159,7 +161,7 @@ func (w *worker) doReduceTask() {
 	doneTaskReply := DoneReply{}
 	ok := call("Coordinator.DoneTask", &doneTaskArgs, &doneTaskReply)
 	if ok {
-		fmt.Printf("done map task success!\n")
+		//fmt.Printf("done map task success!\n")
 	} else {
 		fmt.Printf("call failed!\n , coordinator not responding")
 	}
