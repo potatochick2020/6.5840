@@ -1,13 +1,13 @@
 package mr
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"net/rpc"
 	"os"
 	"time"
-	"fmt"
 )
 
 type TaskTracker struct {
@@ -32,7 +32,7 @@ func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskRepl
 	//fmt.Printf("%+v\n", c)
 	if c.phase == 0 {
 		for i := 0; i < c.nMap; i++ {
-			fmt.Printf("Task %d: %+v\n", i,  c.taskTrackers[i])
+			fmt.Printf("Task %d: %+v\n", i, c.taskTrackers[i])
 			if c.taskTrackers[i].status == 0 {
 				reply.wait = false
 				reply.Task = new(Task)
@@ -46,11 +46,12 @@ func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskRepl
 				fmt.Printf("allocate map task %d \n", reply.Task.TaskId)
 				fmt.Printf("%+v\n", reply)
 				fmt.Printf("%+v\n", reply.Task)
-				
+
 				return nil
 			}
 		}
 		//check is all done, some form of heart beat
+		allDone := true
 		for i := 0; i < c.nMap; i++ {
 			if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
 				fmt.Printf("Redistribute Task %d", i)
@@ -61,7 +62,12 @@ func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskRepl
 			} else {
 				reply.wait = true
 			}
+			allDone = allDone && (c.taskTrackers[i].status == 2)
 		}
+		if !allDone {
+			return nil
+		}
+
 		//if all done, then change phase to 1
 		c.phase = 1
 		c.taskTrackers = make([]TaskTracker, c.nReduce)
@@ -81,6 +87,7 @@ func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskRepl
 		//check is all done, some form of heart beat
 		//if all done, then change phase to 2
 		//check is all done, some form of heart beat
+		allDone := true
 		for i := 0; i < c.nMap; i++ {
 			if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
 				c.taskTrackers[i].Redistribute++
@@ -90,6 +97,10 @@ func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskRepl
 			} else {
 				reply.wait = true
 			}
+			allDone = allDone && (c.taskTrackers[i].status == 2)
+		}
+		if !allDone {
+			return nil
 		}
 		c.phase = 2
 	}
