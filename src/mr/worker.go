@@ -57,12 +57,12 @@ func Worker(mapf func(string, string) []KeyValue,
 }
 
 func (w *worker) RequestTask() {
-	requestTaskArgs := RequestTaskArgs{}
-	requestTaskReply := RequestTaskReply{}
 	endSignal := false
 
 	for !endSignal {
 		//fmt.Printf("request task")
+		requestTaskArgs := RequestTaskArgs{}
+		requestTaskReply := RequestTaskReply{}
 		ok := call("Coordinator.AllocateTask", &requestTaskArgs, &requestTaskReply)
 
 		if ok {
