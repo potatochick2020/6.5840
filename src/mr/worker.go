@@ -53,30 +53,32 @@ func Worker(mapf func(string, string) []KeyValue,
 	w.Mapf = mapf
 	w.Reducef = reducef
 	w.RequestTask()
+	fmt.Printf("worker exit\n")
 }
 
-func (w *worker) RequestTask() {
-	requestTaskArgs := RequestTaskArgs{}
-	requestTaskReply := RequestTaskReply{}
-	endSignal := false
-	
-	for !endSignal {
+func (w *worker) RequestTask() {  
+	for {
 		//fmt.Printf("request task")
+		requestTaskArgs := RequestTaskArgs{}
+		requestTaskReply := RequestTaskReply{}
 		ok := call("Coordinator.AllocateTask", &requestTaskArgs, &requestTaskReply)
 		
 		if ok {
-			if requestTaskReply.wait {
-				time.Sleep(5 * time.Second)
-			} else { 
-				w.Task = requestTaskReply.Task
-				if requestTaskReply.Task.TType == Map {
-					w.doMapTask()
-				} else if requestTaskReply.Task.TType == Reduce {
-					w.doReduceTask()
-				} else if requestTaskReply.Task.TType == Done {
-					endSignal = true
+			if requestTaskReply.done {
+				break
+			} else {
+				if requestTaskReply.wait {
+					time.Sleep(5 * time.Second)
+				} else { 
+					w.Task = requestTaskReply.Task
+					if requestTaskReply.Task.TType == Map {
+						w.doMapTask()
+					} else if requestTaskReply.Task.TType == Reduce {
+						w.doReduceTask()
+					}
 				}
 			}
+			
 		} else {
 			fmt.Printf("call failed!\n , coordinator not responding")
 		}
