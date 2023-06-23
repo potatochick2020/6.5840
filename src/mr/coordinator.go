@@ -21,7 +21,7 @@ type Coordinator struct {
 	taskTrackers []TaskTracker
 	nMap         int
 	nReduce      int
-	phase        int // 0: map; 1: reduce; 2: done and exit
+	phase        Phase // 0: map; 1: reduce; 2: done and exit
 }
 
 // RPC handlers for the worker to call.
@@ -30,97 +30,101 @@ type Coordinator struct {
 func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskReply) error {
 	//fmt.Printf("%+v\n", c)
 LOOP:
-	for {
-		if c.phase == 0 {
-			for i := 0; i < c.nMap; i++ {
+	if c.phase == MAP {
+		for i := 0; i < c.nMap; i++ {
 
-				if c.taskTrackers[i].status == 0 {
-					fmt.Printf("Task %d: %+v\n", i, c.taskTrackers[i])
-					reply.wait = false
-					reply.Task = new(Task)
-					reply.Task.TType = Map
-					reply.Task.TaskId = i
-					reply.Task.NReduce = c.nReduce
-					reply.Task.NMap = c.nMap
-					reply.Task.FileName = c.files[i]
-					c.taskTrackers[i].start = time.Now()
-					c.taskTrackers[i].status = 1
-					fmt.Printf("allocate map task %d \n", reply.Task.TaskId)
-					fmt.Printf("Task detail: %+v\n", reply.Task)
-					return nil
-				}
-			}
-			//check is all done, some form of heart beat
-			allDone := true
-			for i := 0; i < c.nMap; i++ {
-				if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
-					fmt.Printf("Redistribute Task %d\n", i)
-					c.taskTrackers[i].Redistribute++
-					c.taskTrackers[i].start = time.Now()
-					c.taskTrackers[i].status = 0
-					goto LOOP
-				}
-				allDone = allDone && (c.taskTrackers[i].status == 2)
-			}
-			if !allDone {
-				reply.wait = true
+			if c.taskTrackers[i].status == 0 {
+				fmt.Printf("Task %d: %+v\n", i, c.taskTrackers[i])
+				reply.phase = MAP
+				reply.wait = false
+				reply.Task = new(Task)
+				reply.Task.TaskId = i
+				reply.Task.NReduce = c.nReduce
+				reply.Task.NMap = c.nMap
+				reply.Task.FileName = c.files[i]
+				c.taskTrackers[i].start = time.Now()
+				c.taskTrackers[i].status = 1
+				fmt.Printf("allocate map task %d \n", reply.Task.TaskId)
+				fmt.Printf("Task detail: %+v\n", reply.Task)
 				return nil
 			}
-
-			//if all done, then change phase to 1
-			c.phase = 1
-			c.taskTrackers = make([]TaskTracker, c.nReduce)
-			fmt.Printf("Finish Map phase, go to reduce phase \n")
-			continue
-		} else if c.phase == 1 {
-			for j := 0; j < c.nReduce; j++ {
-				if c.taskTrackers[j].status == 0 {
-					fmt.Printf("Task %d: %+v\n", j, c.taskTrackers[j])
-					reply.wait = false
-					reply.Task = new(Task)
-					reply.Task.TType = Reduce
-					reply.Task.TaskId = j
-					reply.Task.NReduce = c.nReduce
-					reply.Task.NMap = c.nMap
-					reply.Task.FileName = ""
-					c.taskTrackers[j].start = time.Now()
-					c.taskTrackers[j].status = 1
-					fmt.Printf("allocate reduce task %d \n", reply.Task.TaskId)
-					fmt.Printf("Task detail: %+v\n", reply.Task)
-					return nil
-				}
-			}
-			//check is all done, some form of heart beat
-			//if all done, then change phase to 2
-			//check is all done, some form of heart beat
-			allDone := true
-			for i := 0; i < c.nReduce; i++ {
-				if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
-					fmt.Printf("Redistribute Task %d \n", i)
-					fmt.Printf("%+v\n", c)
-					c.taskTrackers[i].Redistribute++
-					c.taskTrackers[i].start = time.Now()
-					c.taskTrackers[i].status = 0
-					goto LOOP
-				}
-				allDone = allDone && (c.taskTrackers[i].status == 2)
-			}
-			if !allDone {
-				reply.wait = true
-				return nil
-			}
-			c.phase = 2
 		}
-		reply.wait = true
+		//check is all done, some form of heart beat
+		allDone := true
+		for i := 0; i < c.nMap; i++ {
+			if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
+				fmt.Printf("Redistribute Task %d\n", i)
+				c.taskTrackers[i].Redistribute++
+				c.taskTrackers[i].start = time.Now()
+				c.taskTrackers[i].status = 0
+				goto LOOP
+			}
+			allDone = allDone && (c.taskTrackers[i].status == 2)
+		}
+		if !allDone {
+			reply.wait = true
+			return nil
+		}
+
+		//if all done, then change phase to 1
+		c.phase = 1
+		c.taskTrackers = make([]TaskTracker, c.nReduce)
+		fmt.Printf("Finish Map phase, go to reduce phase \n")
+		goto LOOP
+	} else if c.phase == REDUCE {
+		for j := 0; j < c.nReduce; j++ {
+			if c.taskTrackers[j].status == 0 {
+				fmt.Printf("Task %d: %+v\n", j, c.taskTrackers[j])
+				reply.phase = REDUCE
+				reply.wait = false
+				reply.Task = new(Task)
+				reply.Task.TaskId = j
+				reply.Task.NReduce = c.nReduce
+				reply.Task.NMap = c.nMap
+				reply.Task.FileName = ""
+				c.taskTrackers[j].start = time.Now()
+				c.taskTrackers[j].status = 1
+				fmt.Printf("allocate reduce task %d \n", reply.Task.TaskId)
+				fmt.Printf("Task detail: %+v\n", reply.Task)
+				return nil
+			}
+		}
+		//check is all done, some form of heart beat
+		//if all done, then change phase to 2
+		//check is all done, some form of heart beat
+		allDone := true
+		for i := 0; i < c.nReduce; i++ {
+			if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
+				fmt.Printf("Redistribute Task %d \n", i)
+				fmt.Printf("%+v\n", c)
+				c.taskTrackers[i].Redistribute++
+				c.taskTrackers[i].start = time.Now()
+				c.taskTrackers[i].status = 0
+				goto LOOP
+			}
+			allDone = allDone && (c.taskTrackers[i].status == 2)
+		}
+		if !allDone {
+			reply.wait = true
+			return nil
+		}
+		c.phase = 2
+		goto LOOP
+	} else if c.phase == DONE {
+		reply.phase = DONE
+		reply.wait = false
+		fmt.Printf("All done, exit \n")
 		return nil
 	}
+	reply.wait = true
+	return nil
 }
 
 // a call to Done means that the worker has finished processing
 func (c *Coordinator) DoneTask(doneArgs *DoneArgs, doneReply *DoneReply) error {
-	if doneArgs.TType == Map && c.phase == 0 {
+	if doneArgs.phase == MAP && c.phase == 0 {
 		c.taskTrackers[doneArgs.TaskId].status = 2
-	} else if doneArgs.TType == Reduce && c.phase == 1 {
+	} else if doneArgs.phase == REDUCE && c.phase == 1 {
 		c.taskTrackers[doneArgs.TaskId].status = 2
 	}
 	return nil
