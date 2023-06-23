@@ -68,10 +68,11 @@ func (w *worker) RequestTask() {
 			if requestTaskReply.wait {
 				time.Sleep(5 * time.Second)
 			} else { 
+				w.Task = requestTaskReply.Task
 				if requestTaskReply.Task.TType == Map {
-					w.doMapTask(requestTaskReply.Task)
+					w.doMapTask()
 				} else if requestTaskReply.Task.TType == Reduce {
-					w.doReduceTask(requestTaskReply.Task)
+					w.doReduceTask()
 				} else if requestTaskReply.Task.TType == Done {
 					endSignal = true
 				}
