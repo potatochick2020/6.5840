@@ -1,7 +1,7 @@
 package mr
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -40,7 +40,7 @@ LOOP:
 		if c.phase == 0 {
 			for i := 0; i < c.nMap; i++ {
 				if c.taskTrackers[i].status == 0 {
-					fmt.Printf("Task %d: %+v\n", i, c.taskTrackers[i])
+					//fmt.printf("Task %d: %+v\n", i, c.taskTrackers[i])
 					reply.wait = false
 					reply.Task = new(Task)
 					reply.Task.TType = Map
@@ -50,8 +50,8 @@ LOOP:
 					reply.Task.FileName = c.files[i]
 					c.taskTrackers[i].start = time.Now()
 					c.taskTrackers[i].status = 1
-					fmt.Printf("allocate map task %d \n", reply.Task.TaskId)
-					fmt.Printf("Task detail: %+v\n", reply.Task)
+					//fmt.printf("allocate map task %d \n", reply.Task.TaskId)
+					//fmt.printf("Task detail: %+v\n", reply.Task)
 					c.taskTrackers_m.Unlock()
 					c.phase_m.Unlock()
 					return nil
@@ -61,7 +61,7 @@ LOOP:
 			allDone := true
 			for i := 0; i < c.nMap; i++ {
 				if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
-					fmt.Printf("Redistribute Task %d\n", i)
+					//fmt.printf("Redistribute Task %d\n", i)
 					c.taskTrackers[i].Redistribute++
 					c.taskTrackers[i].start = time.Now()
 					c.taskTrackers[i].status = 0
@@ -79,12 +79,12 @@ LOOP:
 			//if all done, then change phase to 1
 			c.phase = 1
 			c.taskTrackers = make([]TaskTracker, c.nReduce)
-			fmt.Printf("Finish Map phase, go to reduce phase \n")
+			//fmt.printf("Finish Map phase, go to reduce phase \n")
 			continue
 		} else if c.phase == 1 {
 			for j := 0; j < c.nReduce; j++ {
 				if c.taskTrackers[j].status == 0 {
-					fmt.Printf("Task %d: %+v\n", j, c.taskTrackers[j])
+					//fmt.printf("Task %d: %+v\n", j, c.taskTrackers[j])
 					reply.wait = false
 					reply.Task = new(Task)
 					reply.Task.TType = Reduce
@@ -94,8 +94,8 @@ LOOP:
 					reply.Task.FileName = ""
 					c.taskTrackers[j].start = time.Now()
 					c.taskTrackers[j].status = 1
-					fmt.Printf("allocate reduce task %d \n", reply.Task.TaskId)
-					fmt.Printf("Task detail: %+v\n", reply.Task)
+					//fmt.printf("allocate reduce task %d \n", reply.Task.TaskId)
+					//fmt.printf("Task detail: %+v\n", reply.Task)
 					c.taskTrackers_m.Unlock()
 					c.phase_m.Unlock()
 					return nil
@@ -107,8 +107,8 @@ LOOP:
 			allDone := true
 			for i := 0; i < c.nReduce; i++ {
 				if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
-					fmt.Printf("Redistribute Task %d \n", i)
-					fmt.Printf("%+v\n", c)
+					//fmt.printf("Redistribute Task %d \n", i)
+					//fmt.printf("%+v\n", c)
 					c.taskTrackers[i].Redistribute++
 					c.taskTrackers[i].start = time.Now()
 					c.taskTrackers[i].status = 0
@@ -123,9 +123,13 @@ LOOP:
 				return nil
 			}
 			c.phase = 2
+			//fmt.printf("Finish Reduce phase, go to done phase \n")
 			continue;
-		} else if c.phase == 2 {
+		} else if c.phase == 2 { 
 			reply.done = true
+			//fmt.printf("All done: %+v\n", reply)
+			c.taskTrackers_m.Unlock()
+			c.phase_m.Unlock()
 			return nil
 		}
 		reply.wait = true

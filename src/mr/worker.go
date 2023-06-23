@@ -53,7 +53,7 @@ func Worker(mapf func(string, string) []KeyValue,
 	w.Mapf = mapf
 	w.Reducef = reducef
 	w.RequestTask()
-	fmt.Printf("worker exit\n")
+	//fmt.printf("worker exit\n")
 }
 
 func (w *worker) RequestTask() {  
@@ -64,7 +64,8 @@ func (w *worker) RequestTask() {
 		ok := call("Coordinator.AllocateTask", &requestTaskArgs, &requestTaskReply)
 		
 		if ok {
-			if requestTaskReply.done {
+			//fmt.printf("received reply %+v \n", requestTaskReply)
+			if requestTaskReply.done || requestTaskReply.Task == nil{
 				break
 			} else {
 				if requestTaskReply.wait {
@@ -80,14 +81,14 @@ func (w *worker) RequestTask() {
 			}
 			
 		} else {
-			fmt.Printf("call failed!\n , coordinator not responding")
+			//fmt.printf("call failed!\n , coordinator not responding")
 		}
 	}
 }
 
 func (w *worker) doMapTask() {
-	fmt.Printf("received map task %d \n", w.Task.TaskId)
-	fmt.Printf("Task detail: %+v\n", w.Task)
+	//fmt.printf("received map task %d \n", w.Task.TaskId)
+	//fmt.printf("Task detail: %+v\n", w.Task)
 	intermediate := make([][]KeyValue, w.Task.NReduce)
 	file, err := os.Open(w.Task.FileName)
 	if err != nil {
@@ -97,7 +98,7 @@ func (w *worker) doMapTask() {
 	if err != nil {
 		log.Fatalf("cannot read %v", file)
 	}
-	kva := w.Mapf("", string(content))
+	kva := w.Mapf(w.Task.FileName, string(content))
 	for _, kv := range kva {
 		kvIndex := ihash(kv.Key) % w.Task.NReduce
 		intermediate[kvIndex] = append(intermediate[kvIndex], kv)
@@ -117,15 +118,15 @@ func (w *worker) doMapTask() {
 	doneTaskReply := DoneReply{}
 	ok := call("Coordinator.DoneTask", &doneTaskArgs, &doneTaskReply)
 	if ok { 
-		fmt.Printf("Send done map task %d\n", w.Task.TaskId)
+		//fmt.printftf("Send done map task %d\n", w.Task.TaskId)
 	} else {
-		fmt.Printf("call failed!\n , coordinator not responding")
+		//fmt.printf("call failed!\n , coordinator not responding")
 	}
 }
 
 func (w *worker) doReduceTask() {
-	fmt.Printf("received reduce task %d \n", w.Task.TaskId)
-	fmt.Printf("Task detail: %+v\n", w.Task)
+	//fmt.printf("received reduce task %d \n", w.Task.TaskId)
+	//fmt.printf("Task detail: %+v\n", w.Task)
 	var kva []KeyValue
 	for i := 0; i < w.Task.NMap; i++ {
 		filename := fmt.Sprintf("mr-%d-%d", i, w.Task.TaskId)
@@ -167,9 +168,9 @@ func (w *worker) doReduceTask() {
 	doneTaskReply := DoneReply{}
 	ok := call("Coordinator.DoneTask", &doneTaskArgs, &doneTaskReply)
 	if ok {
-		fmt.Printf("Send done reduce task %d\n", w.Task.TaskId)
+		//fmt.printf("Send done reduce task %d\n", w.Task.TaskId)
 	} else {
-		fmt.Printf("call failed!\n , coordinator not responding")
+		//fmt.printf("call failed!\n , coordinator not responding")
 	}
 }
 

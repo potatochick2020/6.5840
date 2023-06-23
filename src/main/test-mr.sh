@@ -105,6 +105,8 @@ if cmp mr-wc-all mr-correct-wc.txt
 then
   echo '---' wc test: PASS
 else
+  cat mr-correct-wc.txt >> keep-mr-correct-wc.txt
+  cat mr-wc-all >> keep-mr-wc-all.txt
   echo '---' wc output is not the same as mr-correct-wc.txt
   echo '---' wc test: FAIL
   failed_any=1
@@ -136,6 +138,8 @@ if cmp mr-indexer-all mr-correct-indexer.txt
 then
   echo '---' indexer test: PASS
 else
+  cat mr-indexer-all >> keep-mr-indexer-all.txt
+  cat mr-correct-indexer >> keep-mr-correct-wc.txt
   echo '---' indexer output is not the same as mr-correct-indexer.txt
   echo '---' indexer test: FAIL
   failed_any=1
@@ -324,6 +328,8 @@ if cmp mr-crash-all mr-correct-crash.txt
 then
   echo '---' crash test: PASS
 else
+  cat mr-crash-all >> keep-mr-crash-all.txt 
+  
   echo '---' crash output is not the same as mr-correct-crash.txt
   echo '---' crash test: FAIL
   failed_any=1
