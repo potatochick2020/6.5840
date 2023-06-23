@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -17,11 +18,13 @@ type TaskTracker struct {
 }
 
 type Coordinator struct {
-	files        []string
-	taskTrackers []TaskTracker
-	nMap         int
-	nReduce      int
-	phase        int // 0: map; 1: reduce; 2: done and exit
+	files          []string // read only
+	nMap           int
+	nReduce        int
+	taskTrackers   []TaskTracker
+	taskTrackers_m sync.Mutex
+	phase          int // 0: map; 1: reduce; 2: done and exit
+	phase_m        sync.Mutex
 }
 
 // RPC handlers for the worker to call.
@@ -29,11 +32,13 @@ type Coordinator struct {
 
 func (c *Coordinator) AllocateTask(args *RequestTaskArgs, reply *RequestTaskReply) error {
 	//fmt.Printf("%+v\n", c)
+	c.phase_m.Lock()
+	c.taskTrackers_m.Lock()
 LOOP:
 	for {
+
 		if c.phase == 0 {
 			for i := 0; i < c.nMap; i++ {
-
 				if c.taskTrackers[i].status == 0 {
 					fmt.Printf("Task %d: %+v\n", i, c.taskTrackers[i])
 					reply.wait = false
@@ -47,6 +52,8 @@ LOOP:
 					c.taskTrackers[i].status = 1
 					fmt.Printf("allocate map task %d \n", reply.Task.TaskId)
 					fmt.Printf("Task detail: %+v\n", reply.Task)
+					c.taskTrackers_m.Unlock()
+					c.phase_m.Unlock()
 					return nil
 				}
 			}
@@ -64,6 +71,8 @@ LOOP:
 			}
 			if !allDone {
 				reply.wait = true
+				c.taskTrackers_m.Unlock()
+				c.phase_m.Unlock()
 				return nil
 			}
 
@@ -87,6 +96,8 @@ LOOP:
 					c.taskTrackers[j].status = 1
 					fmt.Printf("allocate reduce task %d \n", reply.Task.TaskId)
 					fmt.Printf("Task detail: %+v\n", reply.Task)
+					c.taskTrackers_m.Unlock()
+					c.phase_m.Unlock()
 					return nil
 				}
 			}
@@ -107,22 +118,30 @@ LOOP:
 			}
 			if !allDone {
 				reply.wait = true
+				c.taskTrackers_m.Unlock()
+				c.phase_m.Unlock()
 				return nil
 			}
 			c.phase = 2
 		}
 		reply.wait = true
+		c.taskTrackers_m.Unlock()
+		c.phase_m.Unlock()
 		return nil
 	}
 }
 
 // a call to Done means that the worker has finished processing
 func (c *Coordinator) DoneTask(doneArgs *DoneArgs, doneReply *DoneReply) error {
+	c.phase_m.Lock()
+	c.taskTrackers_m.Lock()
 	if doneArgs.TType == Map && c.phase == 0 {
 		c.taskTrackers[doneArgs.TaskId].status = 2
 	} else if doneArgs.TType == Reduce && c.phase == 1 {
 		c.taskTrackers[doneArgs.TaskId].status = 2
 	}
+	c.taskTrackers_m.Unlock()
+	c.phase_m.Unlock()
 	return nil
 }
 
@@ -146,10 +165,11 @@ func (c *Coordinator) Done() bool {
 	ret := false
 
 	// Your code here.
+	c.phase_m.Lock()
 	if c.phase == 2 {
 		ret = true
 	}
-
+	c.phase_m.Unlock()
 	return ret
 }
 
@@ -157,12 +177,16 @@ func (c *Coordinator) Done() bool {
 // main/mrcoordinator.go calls this function.
 // nReduce is the number of reduce tasks to use.
 func MakeCoordinator(files []string, nReduce int) *Coordinator {
+
 	c := Coordinator{}
 	c.nMap = len(files)
 	c.nReduce = nReduce
 	c.phase = 0
+	c.taskTrackers_m = sync.Mutex{}
+	c.phase_m = sync.Mutex{}
 	// Your code here.
 	c.files = files
+
 	if c.nMap > c.nReduce {
 		c.taskTrackers = make([]TaskTracker, c.nMap)
 	} else {
