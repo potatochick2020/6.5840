@@ -110,6 +110,10 @@ LOOP:
 				return nil
 			}
 			c.phase = 2
+			continue;
+		} else if c.phase == 2 {
+			reply.done = true
+			return nil
 		}
 		reply.wait = true
 		return nil

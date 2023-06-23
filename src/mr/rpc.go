@@ -17,6 +17,7 @@ type RequestTaskArgs struct{}
 type RequestTaskReply struct {
 	Task *Task
 	wait bool // if true, then wait for a while and then ask again
+	done bool
 }
 
 type DoneArgs struct {
@@ -34,8 +35,7 @@ type TaskType int
 
 const (
 	Map    TaskType = 0
-	Reduce TaskType = 1
-	Done   TaskType = 2
+	Reduce TaskType = 1 
 )
 
 type Task struct {
