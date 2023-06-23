@@ -53,28 +53,27 @@ func Worker(mapf func(string, string) []KeyValue,
 	w.Mapf = mapf
 	w.Reducef = reducef
 	w.RequestTask()
-	fmt.Printf("Done all task : worker exit\n")
 }
 
 func (w *worker) RequestTask() {
+	requestTaskArgs := RequestTaskArgs{}
+	requestTaskReply := RequestTaskReply{}
 	endSignal := false
-
+	
 	for !endSignal {
 		//fmt.Printf("request task")
-		requestTaskArgs := RequestTaskArgs{}
-		requestTaskReply := RequestTaskReply{}
 		ok := call("Coordinator.AllocateTask", &requestTaskArgs, &requestTaskReply)
-
+		
 		if ok {
 			if requestTaskReply.wait {
 				time.Sleep(5 * time.Second)
-			} else {
+			} else { 
 				w.Task = requestTaskReply.Task
-				if requestTaskReply.phase == MAP {
+				if requestTaskReply.Task.TType == Map {
 					w.doMapTask()
-				} else if requestTaskReply.phase == REDUCE {
+				} else if requestTaskReply.Task.TType == Reduce {
 					w.doReduceTask()
-				} else if requestTaskReply.phase == DONE {
+				} else if requestTaskReply.Task.TType == Done {
 					endSignal = true
 				}
 			}
@@ -112,10 +111,10 @@ func (w *worker) doMapTask() {
 		}
 		ifile.Close()
 	}
-	doneTaskArgs := DoneArgs{phase: MAP, TaskId: w.Task.TaskId}
+	doneTaskArgs := DoneArgs{TType:w.Task.TType, TaskId: w.Task.TaskId}
 	doneTaskReply := DoneReply{}
 	ok := call("Coordinator.DoneTask", &doneTaskArgs, &doneTaskReply)
-	if ok {
+	if ok { 
 		fmt.Printf("Send done map task %d\n", w.Task.TaskId)
 	} else {
 		fmt.Printf("call failed!\n , coordinator not responding")
@@ -162,7 +161,7 @@ func (w *worker) doReduceTask() {
 		i = j
 	}
 	ofile.Close()
-	doneTaskArgs := DoneArgs{phase: REDUCE, TaskId: w.Task.TaskId}
+	doneTaskArgs := DoneArgs{TType:w.Task.TType, TaskId: w.Task.TaskId}
 	doneTaskReply := DoneReply{}
 	ok := call("Coordinator.DoneTask", &doneTaskArgs, &doneTaskReply)
 	if ok {
