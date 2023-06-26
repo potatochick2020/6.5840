@@ -16,8 +16,8 @@ type RequestTaskArgs struct{}
 
 type RequestTaskReply struct {
 	Task *Task
-	wait bool // if true, then wait for a while and then ask again
-	done bool
+	Wait bool // if true, then wait for a while and then ask again
+	Done bool
 }
 
 type DoneArgs struct {

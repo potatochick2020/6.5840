@@ -61,20 +61,23 @@ func (w *worker) RequestTask() {
 		//fmt.Printf("request task")
 		requestTaskArgs := RequestTaskArgs{}
 		requestTaskReply := RequestTaskReply{}
+		//fmt.Printf("call rpc allocate task\n")
 		ok := call("Coordinator.AllocateTask", &requestTaskArgs, &requestTaskReply)
 		
 		if ok {
-			//fmt.printf("received reply %+v \n", requestTaskReply)
-			if requestTaskReply.done || requestTaskReply.Task == nil{
+			//fmt.Printf("received reply %+v \n", requestTaskReply)
+			if requestTaskReply.Done {
 				break
 			} else {
-				if requestTaskReply.wait {
+				if requestTaskReply.Wait {
 					time.Sleep(5 * time.Second)
 				} else { 
 					w.Task = requestTaskReply.Task
 					if requestTaskReply.Task.TType == Map {
+						//fmt.Printf("Do map task %d : %+v - Task: %+v \n", w.Task.TaskId,requestTaskReply,w.Task)
 						w.doMapTask()
 					} else if requestTaskReply.Task.TType == Reduce {
+						//fmt.Printf("Do reduce task %d : %+v - Task: %+v \n", w.Task.TaskId,requestTaskReply,w.Task)
 						w.doReduceTask()
 					}
 				}

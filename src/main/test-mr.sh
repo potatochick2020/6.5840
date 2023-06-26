@@ -136,10 +136,12 @@ maybe_quiet $TIMEOUT ../mrworker ../../mrapps/indexer.so
 sort mr-out* | grep . > mr-indexer-all
 if cmp mr-indexer-all mr-correct-indexer.txt
 then
+  cat mr-indexer-all >> keep-mr-indexer-all.txt
+  cat mr-correct-indexer.txt >> keep-mr-correct-indexer.txt
   echo '---' indexer test: PASS
 else
   cat mr-indexer-all >> keep-mr-indexer-all.txt
-  cat mr-correct-indexer >> keep-mr-correct-wc.txt
+  cat mr-correct-indexer.txt >> keep-mr-correct-indexer.txt
   echo '---' indexer output is not the same as mr-correct-indexer.txt
   echo '---' indexer test: FAIL
   failed_any=1
@@ -168,8 +170,10 @@ fi
 
 if cat mr-out* | grep '^parallel.* 2' > /dev/null
 then
+  cat mr-out* | grep '^times-' | wc -l | sed 's/ //g' >> keep-map-parallelism.txt
   echo '---' map parallelism test: PASS
 else
+  cat mr-out* | grep '^times-' | wc -l | sed 's/ //g' >> keep-map-parallelism.      
   echo '---' map workers did not run in parallel
   echo '---' map parallelism test: FAIL
   failed_any=1
@@ -194,8 +198,10 @@ if [ "$NT" -lt "2" ]
 then
   echo '---' too few parallel reduces.
   echo '---' reduce parallelism test: FAIL
+  cat mr-out*  >> keep-reduce-parallelism.txt 
   failed_any=1
 else
+  cat mr-out* >> keep-reduce-parallelism.txt 
   echo '---' reduce parallelism test: PASS
 fi
 
@@ -276,8 +282,14 @@ wait
 sort mr-out* | grep . > mr-wc-all-final
 if cmp mr-wc-all-final mr-wc-all-initial
 then
+  sort mr-out* > keep-mr-out-earlyexit.txt
+  cat  mr-wc-all-initial >> keep-mr-wc-all-initial.txt
+  cat  mr-wc-all-final >> keep-mr-wc-all-final.txt
   echo '---' early exit test: PASS
 else
+  sort mr-out* > keep-mr-out-earlyexit.txt
+  cat  mr-wc-all-initial >> keep-mr-wc-all-initial.txt
+  cat  mr-wc-all-final >> keep-mr-wc-all-final.txt
   echo '---' output changed after first worker exited
   echo '---' early exit test: FAIL
   failed_any=1

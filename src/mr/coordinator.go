@@ -9,6 +9,7 @@ import (
 	"os"
 	"sync"
 	"time"
+	"math"
 )
 
 type TaskTracker struct {
@@ -41,7 +42,7 @@ LOOP:
 			for i := 0; i < c.nMap; i++ {
 				if c.taskTrackers[i].status == 0 {
 					//fmt.printf("Task %d: %+v\n", i, c.taskTrackers[i])
-					reply.wait = false
+					reply.Wait = false
 					reply.Task = new(Task)
 					reply.Task.TType = Map
 					reply.Task.TaskId = i
@@ -50,8 +51,7 @@ LOOP:
 					reply.Task.FileName = c.files[i]
 					c.taskTrackers[i].start = time.Now()
 					c.taskTrackers[i].status = 1
-					//fmt.printf("allocate map task %d \n", reply.Task.TaskId)
-					//fmt.printf("Task detail: %+v\n", reply.Task)
+					//fmt.Printf("allocate map task %d - Task detail: %+v\n", reply.Task.TaskId, reply.Task) 
 					c.taskTrackers_m.Unlock()
 					c.phase_m.Unlock()
 					return nil
@@ -60,8 +60,10 @@ LOOP:
 			//check is all done, some form of heart beat
 			allDone := true
 			for i := 0; i < c.nMap; i++ {
-				if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
-					//fmt.printf("Redistribute Task %d\n", i)
+				if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10 * time.Duration( math.Max(float64(c.taskTrackers[i].Redistribute),float64(1))) * time.Second {
+					//fmt.Printf(time.Now().Sub(c.taskTrackers[i].start).String());
+					//fmt.Printf((time.Duration(c.taskTrackers[i].Redistribute) * time.Second).String());
+					//fmt.Printf("Redistribute Task %d\n", i)
 					c.taskTrackers[i].Redistribute++
 					c.taskTrackers[i].start = time.Now()
 					c.taskTrackers[i].status = 0
@@ -70,7 +72,7 @@ LOOP:
 				allDone = allDone && (c.taskTrackers[i].status == 2)
 			}
 			if !allDone {
-				reply.wait = true
+				reply.Wait = true
 				c.taskTrackers_m.Unlock()
 				c.phase_m.Unlock()
 				return nil
@@ -82,18 +84,18 @@ LOOP:
 			//fmt.printf("Finish Map phase, go to reduce phase \n")
 			continue
 		} else if c.phase == 1 {
-			for j := 0; j < c.nReduce; j++ {
-				if c.taskTrackers[j].status == 0 {
-					//fmt.printf("Task %d: %+v\n", j, c.taskTrackers[j])
-					reply.wait = false
+			for i := 0; i < c.nReduce; i++ {
+				if c.taskTrackers[i].status == 0 {
+					//fmt.printf("Task %d: %+v\n", i, c.taskTrackers[i])
+					reply.Wait = false
 					reply.Task = new(Task)
 					reply.Task.TType = Reduce
-					reply.Task.TaskId = j
+					reply.Task.TaskId = i
 					reply.Task.NReduce = c.nReduce
 					reply.Task.NMap = c.nMap
 					reply.Task.FileName = ""
-					c.taskTrackers[j].start = time.Now()
-					c.taskTrackers[j].status = 1
+					c.taskTrackers[i].start = time.Now()
+					c.taskTrackers[i].status = 1
 					//fmt.printf("allocate reduce task %d \n", reply.Task.TaskId)
 					//fmt.printf("Task detail: %+v\n", reply.Task)
 					c.taskTrackers_m.Unlock()
@@ -106,7 +108,7 @@ LOOP:
 			//check is all done, some form of heart beat
 			allDone := true
 			for i := 0; i < c.nReduce; i++ {
-				if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10*time.Duration(c.taskTrackers[i].Redistribute)*time.Second {
+				if c.taskTrackers[i].status != 2 && time.Now().Sub(c.taskTrackers[i].start) > 10 * time.Duration( math.Max(float64(c.taskTrackers[i].Redistribute),float64(1))) * time.Second {
 					//fmt.printf("Redistribute Task %d \n", i)
 					//fmt.printf("%+v\n", c)
 					c.taskTrackers[i].Redistribute++
@@ -117,22 +119,23 @@ LOOP:
 				allDone = allDone && (c.taskTrackers[i].status == 2)
 			}
 			if !allDone {
-				reply.wait = true
+				reply.Wait = true
 				c.taskTrackers_m.Unlock()
 				c.phase_m.Unlock()
+				//fmt.Printf("Wait - %+v\n",reply)
 				return nil
 			}
 			c.phase = 2
 			//fmt.printf("Finish Reduce phase, go to done phase \n")
 			continue;
 		} else if c.phase == 2 { 
-			reply.done = true
+			reply.Done = true
 			//fmt.printf("All done: %+v\n", reply)
 			c.taskTrackers_m.Unlock()
 			c.phase_m.Unlock()
 			return nil
 		}
-		reply.wait = true
+		reply.Wait = true
 		c.taskTrackers_m.Unlock()
 		c.phase_m.Unlock()
 		return nil
