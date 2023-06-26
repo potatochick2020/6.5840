@@ -41,20 +41,6 @@ I decided to go with the easy way for the coordinator to tell the worker which p
 4. finish distribute reduce task
 5. done
 
-# Lab 2 : Raft
-## 2A: Leader election
-https://thesecretlivesofdata.com/raft/#election 
+pseudocode
 
-```
-Test (2A): initial election ...
---- FAIL: TestInitialElection2A (4.89s)
-    config.go:454: expected one leader, got none
-Test (2A): election after network failure ...
---- FAIL: TestReElection2A (5.07s)
-    config.go:454: expected one leader, got none
-Test (2A): multiple elections ...
---- FAIL: TestManyElections2A (4.97s)
-    config.go:454: expected one leader, got none
-```
-
-To implement heartbeats, define an AppendEntries RPC struct (though you may not need all the arguments yet), and have the leader send them out periodically. Write an AppendEntries RPC handler method that resets the election timeout so that other servers don't step forward as leaders when one has already been elected.
+I had created a common.go to keep shared data structure like task
