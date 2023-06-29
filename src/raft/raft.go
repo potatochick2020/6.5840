@@ -72,11 +72,13 @@ type Raft struct {
 // return currentTerm and whether this server
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) { 
+	rf.mu.Lock()
 	var term int
 	var isleader bool
 	// Your code here (2A).
 	term = rf.currentTerm
 	isleader = rf.role == 2
+	rf.mu.Unlock()
 	return term, isleader
 }
 
@@ -150,29 +152,37 @@ type RequestVoteReply struct {
 
 // RequestVote RPC handler.
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
+	fmt.Printf("Server %d : Received Requested Vote from Server %d\n",rf.me,args.CandidateId)
 	// Your code here (2A, 2B).
 
 	//2A  
+	rf.mu.Lock()
+	//TODO: self dont know how to vote for himself
 	sameOrUpdate := args.Term >= rf.currentTerm
 	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
 		rf.voted = false
 	}
-	if sameOrUpdate && (rf.role == 0 || rf.role == 1) {
-		reply.VoteGranted = (rf.voted == false || rf.votedFor == args.CandidateId) // TODO: add log index support
+	
+	if sameOrUpdate  {
+		decision := (rf.voted == false || rf.votedFor == args.CandidateId) // TODO: add log index support
 		reply.Term = rf.currentTerm
-		if reply.VoteGranted {
+		if decision {
+			fmt.Printf("Server %d : Voted to Server %d\n",rf.me,args.CandidateId)
 			rf.voted = true
 			rf.votedFor = args.CandidateId
+		} else {
+			fmt.Printf("Server %d : Did Not Voted to Server %d\n",rf.me,args.CandidateId)
 		}
 	} else {
 		reply.VoteGranted = false
+		fmt.Printf("Server %d : Did Not Voted to Server %d\n",rf.me,args.CandidateId)
 		if args.Term > rf.currentTerm {
 			rf.currentTerm = args.Term
 		}
 		reply.Term = rf.currentTerm 
 	}
-	
+	rf.mu.Unlock()
 }
 
 type AppendEntriesArgs struct {
@@ -184,8 +194,10 @@ type AppendEntriesReply struct {
 // AppendEntries RPC handler
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	//fmt.Printf("Received Heartbeat \n")
+	rf.mu.Lock()
 	rf.electionTimeout = time.Now() 
 	rf.role = 0
+	rf.mu.Unlock()
 }
 
 // the service using Raft (e.g. a k/v server) wants to start
@@ -201,19 +213,20 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 // term. the third return value is true if this server believes it is
 // the leader.
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
+ 
 	index := -1
 	term := -1
 	isLeader := true
 
 	// Your code here (2B).
-
+ 
 	return index, term, isLeader
 }
 
 // the tester doesn't halt goroutines created by Raft after each test,
 // but it does call the Kill() method. your code can use killed() to
 // check whether Kill() has been called. the use of atomic avoids the
-// need for a lock.
+// need for a Lock.
 //
 // the issue is that long-running goroutines use memory and may chew
 // up CPU time, perhaps causing later tests to fail and generating
@@ -243,7 +256,7 @@ func (rf *Raft) ticker() {
 
 	*/
 	for rf.killed() == false {
-
+		
 		// Your code here (2A)
 		// Check if a leader election should be started.
 		// If the server is a follower and it is not following and leader then start leader election (Initial)
@@ -252,20 +265,24 @@ func (rf *Raft) ticker() {
 		ms := 50 + (rand.Int63() % 300)
 		time.Sleep(time.Duration(ms) * time.Millisecond)
 		//TODO: election time out 
+		
 		skipSleep:  
+		rf.mu.Lock()
 			if rf.role == 0 {
 				if (rf.voted == false || time.Now().Sub(rf.electionTimeout) > time.Duration(3500) * time.Millisecond) { 
-					//fmt.Printf("Enter Candidate : \n")
-					//fmt.Printf(time.Now().Sub(rf.electionTimeout).String())
-					//fmt.Printf((time.Duration(500)*time.Millisecond).String()) 
+					fmt.Printf("Server %d : Enter Candidate \n",rf.me)
+					fmt.Printf(time.Now().Sub(rf.electionTimeout).String())
+					fmt.Printf((time.Duration(500)*time.Millisecond).String()) 
+					fmt.Printf("\n") 
 					rf.electionTimeout = time.Now() 
 					//change to candidate
 					rf.role = 1
+					rf.mu.Unlock()
 					goto skipSleep; 
 				} 
 			} else if rf.role == 1{
 				//request vote
-				//fmt.Printf("RequestVote \n ")
+				fmt.Printf("Server %d : RequestVote \n",rf.me)
 				rf.currentTerm++
 				voteReceived := 0
 				for i := 0; i < len(rf.peers); i++ { 
@@ -274,7 +291,9 @@ func (rf *Raft) ticker() {
 					
 					ok := rf.peers[i].Call("Raft.RequestVote", &args, &reply)
 					if !ok {
-						fmt.Printf("Cannot Received from server %d \n",i)
+						fmt.Printf("Server %d : Cannot Received Vote from server %d \n",rf.me,i)
+					} else {
+						fmt.Printf("Server %d : Success Receove Vote from Server %d \n",rf.me,i)
 					}
 					if reply.Term > rf.currentTerm {
 						rf.currentTerm = reply.Term
@@ -283,15 +302,16 @@ func (rf *Raft) ticker() {
 						voteReceived++
 					}
 					if voteReceived >= len(rf.peers)/2+1 {
-						//fmt.Printf("get elected \n")  
+						fmt.Printf("get elected \n")  
 						rf.role = 2 
+						rf.mu.Unlock()
 						goto skipSleep; 
 					}
 				}
 				//if more then majority then become leader
 				//role change to leader 
 				
-				fmt.Printf("get %d vote in %d- need %d\n ",voteReceived,len(rf.peers),len(rf.peers)/2+1)
+				fmt.Printf("get %d vote in %d- need %d\n",voteReceived,len(rf.peers),len(rf.peers)/2+1)
 				
 			} else if rf.role == 2 {
 				//send append entries
@@ -302,12 +322,13 @@ func (rf *Raft) ticker() {
 
 						ok := rf.peers[i].Call("Raft.AppendEntries", &args, &reply)
 						if !ok {
-							//fmt.Printf("not okay")
+							fmt.Printf("not okay")
 						}
 					}
 					
 				}
 			} 
+		rf.mu.Unlock()
 	}
 }
 
