@@ -56,7 +56,7 @@ type Raft struct {
 	persister *Persister          // Object to hold this peer's persisted state
 	me        int                 // this peer's index into peers[]
 	dead      int32               // set by Kill()
-
+	electionTimeoutMutex sync.Mutex
 	// Your data here (2A, 2B, 2C).
 	// Look at the paper's Figure 2 for a description of what
 	// state a Raft server must maintain.
@@ -152,37 +152,40 @@ type RequestVoteReply struct {
 
 // RequestVote RPC handler.
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	fmt.Printf("Server %d : Received Requested Vote from Server %d\n",rf.me,args.CandidateId)
+	fmt.Printf("Server %d : Received Requested Vote args %+v from Server %d\n",rf.me,args,args.CandidateId) 
 	// Your code here (2A, 2B).
 
-	//2A  
-	rf.mu.Lock()
-	//TODO: self dont know how to vote for himself
-	sameOrUpdate := args.Term >= rf.currentTerm
-	if args.Term > rf.currentTerm {
-		rf.currentTerm = args.Term
-		rf.voted = false
-	}
-	
-	if sameOrUpdate  {
-		decision := (rf.voted == false || rf.votedFor == args.CandidateId) // TODO: add log index support
+	//2A   
+	if args.CandidateId == rf.me {
+		reply.VoteGranted = true
 		reply.Term = rf.currentTerm
-		if decision {
-			fmt.Printf("Server %d : Voted to Server %d\n",rf.me,args.CandidateId)
-			rf.voted = true
-			rf.votedFor = args.CandidateId
-		} else {
-			fmt.Printf("Server %d : Did Not Voted to Server %d\n",rf.me,args.CandidateId)
-		}
+		fmt.Printf("Server %d : Voted to Server %d\n",rf.me,args.CandidateId) 
 	} else {
-		reply.VoteGranted = false
-		fmt.Printf("Server %d : Did Not Voted to Server %d\n",rf.me,args.CandidateId)
+		rf.mu.Lock()
+		defer rf.mu.Unlock()
+		//TODO: self dont know how to vote for himself
+		sameOrUpdate := args.Term >= rf.currentTerm
 		if args.Term > rf.currentTerm {
 			rf.currentTerm = args.Term
+			rf.voted = false
 		}
-		reply.Term = rf.currentTerm 
-	}
-	rf.mu.Unlock()
+		
+		if sameOrUpdate  && rf.voted == false {
+			reply.VoteGranted = true
+			reply.Term = rf.currentTerm 
+			fmt.Printf("Server %d : Voted to Server %d\n",rf.me,args.CandidateId) 
+			rf.voted = true
+			rf.votedFor = args.CandidateId 
+			rf.electionTimeoutMutex.Lock()
+			rf.electionTimeout = time.Now() 
+			rf.electionTimeoutMutex.Unlock()
+		} else {
+			reply.VoteGranted = false 
+			reply.Term = rf.currentTerm 
+			fmt.Printf("Server %d : Did Not Voted to Server %d\n",rf.me,args.CandidateId) 
+		}
+		
+	} 
 }
 
 type AppendEntriesArgs struct {
@@ -194,8 +197,12 @@ type AppendEntriesReply struct {
 // AppendEntries RPC handler
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	//fmt.Printf("Received Heartbeat \n")
-	rf.mu.Lock()
+	fmt.Printf("Server %d : Received Heartbeat  \n",rf.me ) 
+	rf.electionTimeoutMutex.Lock()
 	rf.electionTimeout = time.Now() 
+	rf.electionTimeoutMutex.Unlock()
+
+	rf.mu.Lock() 
 	rf.role = 0
 	rf.mu.Unlock()
 }
@@ -242,6 +249,47 @@ func (rf *Raft) killed() bool {
 	return z == 1
 }
 
+func (rf *Raft) StartElection() {
+	//request vote
+	fmt.Printf("Server %d : RequestVote \n",rf.me)
+	rf.currentTerm++
+	voteReceived := 1
+	for i := 0; i < len(rf.peers); i++ { 
+		if rf.me == i {
+			continue
+		}
+		go func(counter int) { 
+			rf.mu.Lock()
+			defer rf.mu.Lock()
+			args := RequestVoteArgs{Term: pTerm.Load() , CandidateId:rf.me}
+			reply := RequestVoteReply{}
+			
+			ok := rf.peers[counter].Call("Raft.RequestVote", &args, &reply)
+			if !ok {
+				fmt.Printf("Server %d : Cannot Received Vote from server %d \n",rf.me,counter)
+			} else {
+				fmt.Printf("Server %d : Success Receove Vote from Server %d \n",rf.me,counter)
+			}
+			if reply.Term > pTerm.Load() {
+				pTerm.Store(reply.Term)
+			}
+			if reply.VoteGranted {
+				voteReceived += 1
+				if voteReceived >= len(rf.peers)/2+1 {
+					fmt.Printf("Server %d : get elected \n",rf.me)  
+					rf.role = 2  
+				} else {
+					fmt.Printf("Server %d : not elected \n",rf.me)  
+					rf.role = 0  
+				}
+			} else if reply.Term > rf.currentTerm {
+				//goback to follower
+				rf.role = 0
+			}
+		} (i) 
+	}
+}
+
 func (rf *Raft) ticker() {
 	/*
 		•On conversion to candidate, start election:
@@ -261,16 +309,20 @@ func (rf *Raft) ticker() {
 		// Check if a leader election should be started.
 		// If the server is a follower and it is not following and leader then start leader election (Initial)
 		// pause for a random amount of time between 50 and 350
-		// milliseconds.
+		// milliseconds. 
 		ms := 50 + (rand.Int63() % 300)
 		time.Sleep(time.Duration(ms) * time.Millisecond)
 		//TODO: election time out 
 		
 		skipSleep:  
+		if rf.killed() {
+			break;
+		}
 		rf.mu.Lock()
 			if rf.role == 0 {
-				if (rf.voted == false || time.Now().Sub(rf.electionTimeout) > time.Duration(3500) * time.Millisecond) { 
-					fmt.Printf("Server %d : Enter Candidate \n",rf.me)
+				rf.electionTimeoutMutex.Lock()
+				if (rf.voted == false || time.Now().Sub(rf.electionTimeout) > time.Duration(5000) * time.Millisecond) { 
+					fmt.Printf("Server %d : Enter Candidate - rf.voted = %t , %s \n",rf.me, rf.voted, time.Now().Sub(rf.electionTimeout).String())
 					fmt.Printf(time.Now().Sub(rf.electionTimeout).String())
 					fmt.Printf((time.Duration(500)*time.Millisecond).String()) 
 					fmt.Printf("\n") 
@@ -278,36 +330,14 @@ func (rf *Raft) ticker() {
 					//change to candidate
 					rf.role = 1
 					rf.mu.Unlock()
+					rf.electionTimeoutMutex.Unlock()
 					goto skipSleep; 
 				} 
+				rf.electionTimeoutMutex.Unlock()
 			} else if rf.role == 1{
-				//request vote
-				fmt.Printf("Server %d : RequestVote \n",rf.me)
-				rf.currentTerm++
-				voteReceived := 0
-				for i := 0; i < len(rf.peers); i++ { 
-					args := RequestVoteArgs{Term: rf.currentTerm , CandidateId:rf.me}
-					reply := RequestVoteReply{}
-					
-					ok := rf.peers[i].Call("Raft.RequestVote", &args, &reply)
-					if !ok {
-						fmt.Printf("Server %d : Cannot Received Vote from server %d \n",rf.me,i)
-					} else {
-						fmt.Printf("Server %d : Success Receove Vote from Server %d \n",rf.me,i)
-					}
-					if reply.Term > rf.currentTerm {
-						rf.currentTerm = reply.Term
-					}
-					if reply.VoteGranted {
-						voteReceived++
-					}
-					if voteReceived >= len(rf.peers)/2+1 {
-						fmt.Printf("get elected \n")  
-						rf.role = 2 
-						rf.mu.Unlock()
-						goto skipSleep; 
-					}
-				}
+
+			 
+				goto skipSleep
 				//if more then majority then become leader
 				//role change to leader 
 				
@@ -319,10 +349,11 @@ func (rf *Raft) ticker() {
 					if (i != rf.me){
 						args := AppendEntriesArgs{}
 						reply := AppendEntriesReply{}
-
+						fmt.Printf("Server %d : Send HeartBeat to Server %d \n",rf.me,i) 
 						ok := rf.peers[i].Call("Raft.AppendEntries", &args, &reply)
 						if !ok {
-							fmt.Printf("not okay")
+							fmt.Printf("Server %d : Server %d cannot receive heartbeat\n",rf.me,i) 
+							//total peers-1
 						}
 					}
 					
