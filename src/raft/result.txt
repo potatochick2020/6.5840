@@ -1,10 +1,921 @@
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
-FAIL	6.5840/raft [build failed]
+Test (2A): initial election ...
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : Received Requested Vote args &{Term:1 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 1 : Received Requested Vote args &{Term:1 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 2 : get elected 
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 2 : Received Requested Vote args &{Term:2 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 2 : Voted to Server 0
+Server 1 : Received Requested Vote args &{Term:2 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 1 : Voted to Server 0
+Server 0 : get elected 
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:3 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:3 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 2 : get elected 
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:4 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:4 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 2 : get elected 
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:5 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:5 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 2 : get elected 
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:6 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:6 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 2 : get elected 
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:7 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:7 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 2 : get elected 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 2 : Received Requested Vote args &{Term:8 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 0 : Received Requested Vote args &{Term:8 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 0 : Voted to Server 1
+Server 2 : Voted to Server 1
+Server 1 : get elected 
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+warning: term changed even though there were no failuresServer 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : Received Requested Vote args &{Term:9 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 1 : Received Requested Vote args &{Term:9 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 2 : get elected 
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:10 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 2 : get elected 
+Server 0 : Received Requested Vote args &{Term:10 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+  ... Passed --   3.0  3   50    5266    0
+Test (2A): election after network failure ...
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:1 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:1 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 2 : get elected 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : Received Requested Vote args &{Term:2 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 1 : Received Requested Vote args &{Term:2 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 2 : get elected 
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:3 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 1 : Voted to Server 0
+Server 0 : get elected 
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 0 : Send HeartBeat to Server 1 
+Server 0 : Send HeartBeat to Server 2 
+Server 1 : Received Heartbeat  
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:4 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 1 : Voted to Server 0
+Server 0 : get elected 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 1 
+Server 2 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 1 
+Server 1 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:5 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 1 : Voted to Server 0
+Server 2 : Received Requested Vote args &{Term:5 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 2 : Voted to Server 0
+Server 0 : get elected 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 0 : Received Requested Vote args &{Term:6 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 0 : Voted to Server 1
+Server 2 : Received Requested Vote args &{Term:6 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 2 : Voted to Server 1
+Server 1 : get elected 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 1 
+Server 2 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 0 : Send HeartBeat to Server 1 
+Server 0 : Send HeartBeat to Server 2 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 1 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 1 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 0 : Server 2 cannot receive heartbeat
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 2 : Server 1 cannot receive heartbeat
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : Server 2 cannot receive heartbeat
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 0 : Server 2 cannot receive heartbeat
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 2 : Received Requested Vote args &{Term:11 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 2 : Did Not Voted to Server 1
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:13 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 2 : get elected 
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 1 : Received Heartbeat  
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 2 : Server 1 cannot receive heartbeat
+Server 2 : Server 0 cannot receive heartbeat
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Send HeartBeat to Server 1 
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 2 : Server 0 cannot receive heartbeat
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : Received Requested Vote args &{Term:14 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:14 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 2 : get elected 
+Server 0 : Server 1 cannot receive heartbeat
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : Received Requested Vote args &{Term:15 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 1 : Received Requested Vote args &{Term:15 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 2 : get elected 
+  ... Passed --   4.6  3   80    7474    0
+Test (2A): multiple elections ...
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Server 0 cannot receive heartbeat
+Server 2 : Server 1 cannot receive heartbeat
+Server 2 : Server 0 cannot receive heartbeat
+Server 3 : ElectionTimeOut
+Server 3 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:1 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 6 : Voted to Server 3
+Server 2 : Received Requested Vote args &{Term:1 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 2 : Voted to Server 3
+Server 0 : Received Requested Vote args &{Term:1 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 0 : Voted to Server 3
+Server 4 : Received Requested Vote args &{Term:1 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 4 : Voted to Server 3
+Server 5 : Received Requested Vote args &{Term:1 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 1 : Received Requested Vote args &{Term:1 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 1 : Voted to Server 3
+Server 5 : Voted to Server 3
+Server 3 : get elected 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 4 : Received Requested Vote args &{Term:2 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 4 : Voted to Server 0
+Server 1 : Received Requested Vote args &{Term:2 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 1 : Voted to Server 0
+Server 2 : Received Requested Vote args &{Term:2 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 2 : Voted to Server 0
+Server 5 : Received Requested Vote args &{Term:2 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 5 : Voted to Server 0
+Server 6 : Received Requested Vote args &{Term:2 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 6 : Voted to Server 0
+Server 3 : Received Requested Vote args &{Term:2 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 3 : Voted to Server 0
+Server 0 : get elected 
+Server 3 : Send HeartBeat to Server 5 
+Server 3 : Send HeartBeat to Server 1 
+Server 3 : Send HeartBeat to Server 0 
+Server 3 : Send HeartBeat to Server 2 
+Server 3 : Send HeartBeat to Server 4 
+Server 5 : Received Heartbeat  
+Server 3 : Send HeartBeat to Server 6 
+Server 1 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 4 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 3 : Send HeartBeat to Server 6 
+Server 3 : Send HeartBeat to Server 2 
+Server 3 : Send HeartBeat to Server 5 
+Server 3 : Send HeartBeat to Server 4 
+Server 3 : Send HeartBeat to Server 0 
+Server 3 : Send HeartBeat to Server 1 
+Server 2 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 5 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 4 : Received Heartbeat  
+Server 3 : ElectionTimeOut
+Server 3 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:3 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 6 : Voted to Server 3
+Server 4 : Received Requested Vote args &{Term:3 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 4 : Voted to Server 3
+Server 2 : Received Requested Vote args &{Term:3 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 2 : Voted to Server 3
+Server 5 : Received Requested Vote args &{Term:3 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 5 : Voted to Server 3
+Server 1 : Received Requested Vote args &{Term:3 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 1 : Voted to Server 3
+Server 0 : Received Requested Vote args &{Term:3 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 0 : Voted to Server 3
+Server 3 : get elected 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 3 : Send HeartBeat to Server 6 
+Server 3 : Send HeartBeat to Server 0 
+Server 3 : Send HeartBeat to Server 5 
+Server 3 : Send HeartBeat to Server 4 
+Server 3 : Send HeartBeat to Server 2 
+Server 3 : Send HeartBeat to Server 1 
+Server 3 : Send HeartBeat to Server 1 
+Server 3 : Send HeartBeat to Server 6 
+Server 3 : Send HeartBeat to Server 5 
+Server 3 : Send HeartBeat to Server 2 
+Server 3 : Send HeartBeat to Server 0 
+Server 3 : Send HeartBeat to Server 4 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 3 : Send HeartBeat to Server 5 
+Server 3 : Send HeartBeat to Server 0 
+Server 3 : Send HeartBeat to Server 1 
+Server 3 : Send HeartBeat to Server 4 
+Server 3 : Send HeartBeat to Server 6 
+Server 3 : Send HeartBeat to Server 2 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 5 : Received Requested Vote args &{Term:4 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 5 : Voted to Server 2
+Server 1 : Received Requested Vote args &{Term:4 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 6 : Received Requested Vote args &{Term:4 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 6 : Voted to Server 2
+Server 4 : Received Requested Vote args &{Term:4 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 4 : Voted to Server 2
+Server 2 : get elected 
+Server 3 : ElectionTimeOut
+Server 3 : RequestVote 
+Server 2 : Send HeartBeat to Server 6 
+Server 2 : Send HeartBeat to Server 5 
+Server 2 : Send HeartBeat to Server 1 
+Server 2 : Send HeartBeat to Server 3 
+Server 2 : Send HeartBeat to Server 4 
+Server 2 : Send HeartBeat to Server 0 
+Server 2 : Server 0 cannot receive heartbeat
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 3 : Received Requested Vote args &{Term:5 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 6 : Received Requested Vote args &{Term:5 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 6 : Voted to Server 0
+Server 3 : Voted to Server 0
+Server 4 : Received Requested Vote args &{Term:5 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 4 : Voted to Server 0
+Server 0 : get elected 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 3 : Server 1 cannot receive heartbeat
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 0 : Send HeartBeat to Server 5 
+Server 0 : Send HeartBeat to Server 4 
+Server 0 : Send HeartBeat to Server 6 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 3 
+Server 0 : Send HeartBeat to Server 1 
+Server 4 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 3 : Server 2 cannot receive heartbeat
+Server 5 : ElectionTimeOut
+Server 5 : RequestVote 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:6 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 6 : Voted to Server 0
+Server 3 : Received Requested Vote args &{Term:6 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 3 : Voted to Server 0
+Server 4 : Received Requested Vote args &{Term:6 CandidateId:0 LastLogIndex:0 LastLogTerm:0} from Server 0
+Server 4 : Voted to Server 0
+Server 0 : get elected 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 2 : Server 3 cannot receive heartbeat
+Server 0 : Send HeartBeat to Server 1 
+Server 0 : Send HeartBeat to Server 5 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 3 
+Server 0 : Send HeartBeat to Server 4 
+Server 0 : Send HeartBeat to Server 6 
+Server 3 : Received Heartbeat  
+Server 4 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 2 : Server 1 cannot receive heartbeat
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:7 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 0 : Received Requested Vote args &{Term:7 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 0 : Voted to Server 4
+Server 6 : Voted to Server 4
+Server 3 : Received Requested Vote args &{Term:7 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 3 : Voted to Server 4
+Server 4 : get elected 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : Send HeartBeat to Server 6 
+Server 0 : Send HeartBeat to Server 5 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 4 
+Server 0 : Send HeartBeat to Server 1 
+Server 6 : Received Heartbeat  
+Server 4 : Received Heartbeat  
+Server 0 : Send HeartBeat to Server 3 
+Server 3 : Received Heartbeat  
+Server 5 : ElectionTimeOut
+Server 5 : RequestVote 
+Server 0 : Send HeartBeat to Server 6 
+Server 0 : Send HeartBeat to Server 4 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 1 
+Server 0 : Send HeartBeat to Server 5 
+Server 6 : Received Heartbeat  
+Server 0 : Send HeartBeat to Server 3 
+Server 4 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 0 : Send HeartBeat to Server 4 
+Server 0 : Send HeartBeat to Server 5 
+Server 0 : Send HeartBeat to Server 3 
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 6 
+Server 0 : Send HeartBeat to Server 1 
+Server 4 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 0 : Server 2 cannot receive heartbeat
+Server 5 : ElectionTimeOut
+Server 5 : RequestVote 
+Server 3 : Received Requested Vote args &{Term:7 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 3 : Did Not Voted to Server 5
+Server 6 : Received Requested Vote args &{Term:7 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 6 : Did Not Voted to Server 5
+Server 4 : Received Requested Vote args &{Term:7 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 4 : Did Not Voted to Server 5
+Server 0 : Send HeartBeat to Server 2 
+Server 0 : Send HeartBeat to Server 5 
+Server 0 : Send HeartBeat to Server 6 
+Server 0 : Send HeartBeat to Server 3 
+Server 0 : Send HeartBeat to Server 4 
+Server 0 : Send HeartBeat to Server 1 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 3 : Server 6 cannot receive heartbeat
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:8 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 6 : Voted to Server 4
+Server 3 : Received Requested Vote args &{Term:8 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 3 : Voted to Server 4
+Server 5 : Received Requested Vote args &{Term:8 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 5 : Voted to Server 4
+Server 4 : get elected 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 6 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 3 
+Server 5 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 3 : Server 5 cannot receive heartbeat
+Server 4 : Send HeartBeat to Server 3 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 6 
+Server 3 : Received Heartbeat  
+Server 5 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 3 : Server 0 cannot receive heartbeat
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:8 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 4 : Received Requested Vote args &{Term:8 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 5 : Received Requested Vote args &{Term:8 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 5 : Did Not Voted to Server 2
+Server 6 : Did Not Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:8 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Did Not Voted to Server 2
+Server 4 : Did Not Voted to Server 2
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 6 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 3 
+Server 0 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 5 : Received Heartbeat  
+Server 0 : Server 1 cannot receive heartbeat
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 5 : Received Requested Vote args &{Term:9 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 5 : Voted to Server 4
+Server 2 : Received Requested Vote args &{Term:9 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 2 : Did Not Voted to Server 4
+Server 6 : Received Requested Vote args &{Term:9 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 6 : Voted to Server 4
+Server 0 : Received Requested Vote args &{Term:9 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 0 : Did Not Voted to Server 4
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 3 : ElectionTimeOut
+Server 3 : RequestVote 
+Server 5 : ElectionTimeOut
+Server 5 : RequestVote 
+Server 2 : Received Requested Vote args &{Term:10 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 0 : Received Requested Vote args &{Term:10 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 0 : Voted to Server 5
+Server 2 : Voted to Server 5
+Server 4 : Received Requested Vote args &{Term:10 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 6 : Received Requested Vote args &{Term:10 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 6 : Voted to Server 5
+Server 4 : Voted to Server 5
+Server 5 : get elected 
+Server 0 : Server 1 cannot receive heartbeat
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 3 : Server 1 cannot receive heartbeat
+Server 0 : Server 3 cannot receive heartbeat
+Server 2 : Server 4 cannot receive heartbeat
+Server 0 : Server 5 cannot receive heartbeat
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 6 
+Server 5 : Send HeartBeat to Server 4 
+Server 5 : Send HeartBeat to Server 2 
+Server 5 : Send HeartBeat to Server 3 
+Server 6 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 4 : Received Heartbeat  
+Server 3 : Server 2 cannot receive heartbeat
+Server 5 : Send HeartBeat to Server 6 
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 4 
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 3 
+Server 6 : Received Heartbeat  
+Server 5 : Send HeartBeat to Server 2 
+Server 4 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 3 : ElectionTimeOut
+Server 3 : RequestVote 
+Server 6 : ElectionTimeOut
+Server 6 : RequestVote 
+Server 4 : Received Requested Vote args &{Term:11 CandidateId:6 LastLogIndex:0 LastLogTerm:0} from Server 6
+Server 4 : Voted to Server 6
+Server 2 : Received Requested Vote args &{Term:11 CandidateId:6 LastLogIndex:0 LastLogTerm:0} from Server 6
+Server 2 : Voted to Server 6
+Server 5 : Received Requested Vote args &{Term:11 CandidateId:6 LastLogIndex:0 LastLogTerm:0} from Server 6
+Server 5 : Voted to Server 6
+Server 6 : get elected 
+Server 0 : ElectionTimeOut
+Server 0 : RequestVote 
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 6 
+Server 5 : Send HeartBeat to Server 3 
+Server 5 : Send HeartBeat to Server 2 
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 4 
+Server 6 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 4 : Received Heartbeat  
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 5 : Send HeartBeat to Server 6 
+Server 5 : Send HeartBeat to Server 2 
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 4 
+Server 5 : Send HeartBeat to Server 3 
+Server 2 : Received Heartbeat  
+Server 4 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 3 : Server 4 cannot receive heartbeat
+Server 0 : Server 1 cannot receive heartbeat
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 0 : Server 1 cannot receive heartbeat
+Server 5 : Send HeartBeat to Server 3 
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 2 
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 4 
+Server 5 : Send HeartBeat to Server 6 
+Server 2 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 0 : Server 2 cannot receive heartbeat
+Server 0 : Server 2 cannot receive heartbeat
+Server 0 : Server 1 cannot receive heartbeat
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 6 
+Server 5 : Send HeartBeat to Server 2 
+Server 5 : Send HeartBeat to Server 4 
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 3 
+Server 0 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 6 : ElectionTimeOut
+Server 6 : RequestVote 
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 5 : ElectionTimeOut
+Server 5 : RequestVote 
+Server 3 : Received Requested Vote args &{Term:12 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 2 : Received Requested Vote args &{Term:12 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 0 : Received Requested Vote args &{Term:12 CandidateId:5 LastLogIndex:0 LastLogTerm:0} from Server 5
+Server 2 : Voted to Server 5
+Server 0 : Voted to Server 5
+Server 3 : Voted to Server 5
+Server 5 : get elected 
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 5 : Send HeartBeat to Server 4 
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 2 
+Server 5 : Send HeartBeat to Server 3 
+Server 5 : Send HeartBeat to Server 6 
+Server 0 : Server 1 cannot receive heartbeat
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 3 : Received Requested Vote args &{Term:13 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 3 : Voted to Server 4
+Server 0 : Received Requested Vote args &{Term:13 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 0 : Voted to Server 4
+Server 6 : Received Requested Vote args &{Term:13 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 6 : Voted to Server 4
+Server 4 : get elected 
+Server 3 : Server 5 cannot receive heartbeat
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 4 
+Server 5 : Send HeartBeat to Server 6 
+Server 5 : Send HeartBeat to Server 3 
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 2 
+Server 3 : ElectionTimeOut
+Server 3 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:14 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 4 : Received Requested Vote args &{Term:14 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 4 : Voted to Server 3
+Server 6 : Voted to Server 3
+Server 0 : Received Requested Vote args &{Term:14 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 0 : Voted to Server 3
+Server 3 : get elected 
+Server 4 : Send HeartBeat to Server 3 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 6 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 0 
+Server 6 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 0 : Server 5 cannot receive heartbeat
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 5 : Send HeartBeat to Server 1 
+Server 5 : Send HeartBeat to Server 4 
+Server 5 : Send HeartBeat to Server 2 
+Server 5 : Send HeartBeat to Server 3 
+Server 5 : Send HeartBeat to Server 0 
+Server 5 : Send HeartBeat to Server 6 
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:15 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 6 : Voted to Server 4
+Server 3 : Received Requested Vote args &{Term:15 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 3 : Voted to Server 4
+Server 0 : Received Requested Vote args &{Term:15 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 0 : Voted to Server 4
+Server 4 : get elected 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 0 : Server 2 cannot receive heartbeat
+Server 5 : Server 3 cannot receive heartbeat
+Server 5 : ElectionTimeOut
+Server 5 : RequestVote 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 6 
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 3 
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 1 
+Server 6 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 5 : Received Heartbeat  
+Server 3 : Server 6 cannot receive heartbeat
+Server 4 : Server 1 cannot receive heartbeat
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 0 : Received Requested Vote args &{Term:16 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 0 : Voted to Server 4
+Server 6 : Received Requested Vote args &{Term:16 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 6 : Voted to Server 4
+Server 5 : Received Requested Vote args &{Term:16 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 5 : Voted to Server 4
+Server 4 : get elected 
+Server 3 : ElectionTimeOut
+Server 3 : RequestVote 
+Server 5 : Server 1 cannot receive heartbeat
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 4 : Send HeartBeat to Server 3 
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 6 
+Server 0 : Received Heartbeat  
+Server 5 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 0 : Server 2 cannot receive heartbeat
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 3 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 6 
+Server 0 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 5 : Received Heartbeat  
+Server 5 : Server 6 cannot receive heartbeat
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 0 : Received Requested Vote args &{Term:17 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 0 : Voted to Server 4
+Server 5 : Received Requested Vote args &{Term:17 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 5 : Voted to Server 4
+Server 6 : Received Requested Vote args &{Term:17 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 6 : Voted to Server 4
+Server 4 : get elected 
+Server 5 : Server 2 cannot receive heartbeat
+Server 1 : ElectionTimeOut
+Server 1 : RequestVote 
+Server 4 : Received Requested Vote args &{Term:17 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 4 : Did Not Voted to Server 1
+Server 2 : Received Requested Vote args &{Term:17 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 2 : Voted to Server 1
+Server 6 : Received Requested Vote args &{Term:17 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 6 : Did Not Voted to Server 1
+Server 3 : Received Requested Vote args &{Term:17 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 3 : Voted to Server 1
+Server 5 : Received Requested Vote args &{Term:17 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 5 : Did Not Voted to Server 1
+Server 0 : Received Requested Vote args &{Term:17 CandidateId:1 LastLogIndex:0 LastLogTerm:0} from Server 1
+Server 0 : Did Not Voted to Server 1
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 3 
+Server 5 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 4 : Send HeartBeat to Server 6 
+Server 1 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 4 : Server 3 cannot receive heartbeat
+Server 4 : ElectionTimeOut
+Server 4 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:18 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 6 : Voted to Server 4
+Server 2 : Received Requested Vote args &{Term:18 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 2 : Voted to Server 4
+Server 5 : Received Requested Vote args &{Term:18 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 5 : Voted to Server 4
+Server 0 : Received Requested Vote args &{Term:18 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 0 : Voted to Server 4
+Server 1 : Received Requested Vote args &{Term:18 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 1 : Voted to Server 4
+Server 3 : Received Requested Vote args &{Term:18 CandidateId:4 LastLogIndex:0 LastLogTerm:0} from Server 4
+Server 3 : Voted to Server 4
+Server 4 : get elected 
+Server 3 : ElectionTimeOut
+Server 3 : RequestVote 
+Server 0 : Received Requested Vote args &{Term:19 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 0 : Voted to Server 3
+Server 2 : Received Requested Vote args &{Term:19 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 2 : Voted to Server 3
+Server 1 : Received Requested Vote args &{Term:19 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 1 : Voted to Server 3
+Server 5 : Received Requested Vote args &{Term:19 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 5 : Voted to Server 3
+Server 4 : Received Requested Vote args &{Term:19 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 6 : Received Requested Vote args &{Term:19 CandidateId:3 LastLogIndex:0 LastLogTerm:0} from Server 3
+Server 6 : Voted to Server 3
+Server 3 : get elected 
+Server 4 : Voted to Server 3
+Server 4 : Send HeartBeat to Server 6 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 3 
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 5 
+Server 6 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 0 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 5 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+Server 4 : Server 2 cannot receive heartbeat
+Server 5 : Server 1 cannot receive heartbeat
+Server 2 : Server 1 cannot receive heartbeat
+Server 2 : ElectionTimeOut
+Server 2 : RequestVote 
+Server 6 : Received Requested Vote args &{Term:20 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 6 : Voted to Server 2
+Server 4 : Received Requested Vote args &{Term:20 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 4 : Voted to Server 2
+Server 0 : Received Requested Vote args &{Term:20 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 0 : Voted to Server 2
+Server 1 : Received Requested Vote args &{Term:20 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 1 : Voted to Server 2
+Server 5 : Received Requested Vote args &{Term:20 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 5 : Voted to Server 2
+Server 3 : Received Requested Vote args &{Term:20 CandidateId:2 LastLogIndex:0 LastLogTerm:0} from Server 2
+Server 3 : Voted to Server 2
+Server 2 : get elected 
+Server 5 : Server 1 cannot receive heartbeat
+Server 4 : Server 3 cannot receive heartbeat
+Server 4 : Send HeartBeat to Server 0 
+Server 4 : Send HeartBeat to Server 1 
+Server 4 : Send HeartBeat to Server 2 
+Server 4 : Send HeartBeat to Server 5 
+Server 4 : Send HeartBeat to Server 6 
+Server 4 : Send HeartBeat to Server 3 
+Server 0 : Received Heartbeat  
+Server 6 : Received Heartbeat  
+Server 3 : Received Heartbeat  
+Server 5 : Received Heartbeat  
+Server 2 : Received Heartbeat  
+Server 1 : Received Heartbeat  
+  ... Passed --   5.6  7  516   46885    0
+PASS
+ok  	6.5840/raft	13.267s

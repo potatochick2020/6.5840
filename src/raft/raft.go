@@ -66,28 +66,27 @@ type Raft struct {
 	votedFor         int
 	voted            bool
 	role             int //0 for follower, 1 for Candidates, 2 for Leaders
-	electionTimeOut  time.Timer
-	heartbeatTimeOut time.Timer
+	electionTimeOut  *time.Timer
+	heartbeatTimeOut *time.Timer
 }
 
 func StandardHeartBeat() time.Duration {
-	return 5 * time.Second
+	return 150 * time.Millisecond
 }
 
 func RamdomizedElection() time.Duration {
-	return time.Duration(50+(rand.Int63()%300)) * time.Millisecond
+	return time.Duration(100 + (rand.Int63()%500)) * time.Millisecond
 }
 
 // return currentTerm and whether this server
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
 	rf.mu.Lock()
-	var term int
-	var isleader bool
-	// Your code here (2A).
-	term = rf.currentTerm
-	isleader = rf.role == 2
-	rf.mu.Unlock()
+	defer rf.mu.Unlock()
+	var term = rf.currentTerm
+	var isleader = rf.role == 2
+	// Your code here (2A). 
+	
 	return term, isleader
 }
 
@@ -201,7 +200,6 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	rf.mu.Lock()
 	//TODO: make sure replace election timeout with timer
 	rf.electionTimeOut.Reset(RamdomizedElection())
-	rf.heartbeatTimeOut.Stop()
 	rf.role = 0
 	rf.mu.Unlock()
 }
@@ -250,22 +248,19 @@ func (rf *Raft) killed() bool {
 
 func (rf *Raft) SendHeartbeat() {
 	//send append entries
-	//TODO: make sure replace election timeout with timer
-	rf.heartbeatTimeOut.Reset(StandardHeartBeat())
+	//TODO: make sure replace election timeout with timer 
 	for i := 0; i < len(rf.peers); i++ {
 		if i != rf.me {
 			go func(counter int) {
 				args := AppendEntriesArgs{}
 				reply := AppendEntriesReply{}
-				fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, i)
-				ok := rf.peers[i].Call("Raft.AppendEntries", &args, &reply)
+				fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
+				ok := rf.peers[counter].Call("Raft.AppendEntries", &args, &reply)
 				if !ok {
-					fmt.Printf("Server %d : Server %d cannot receive heartbeat\n", rf.me, i)
+					fmt.Printf("Server %d : Server %d cannot receive heartbeat\n", rf.me, counter)
 				}
-			}(i)
-
-		}
-
+			}(i) 
+		} 
 	}
 }
 
@@ -279,38 +274,36 @@ func (rf *Raft) StartElection() {
 	rf.currentTerm += 1
 	voteReceived := 1
 	//Reset election time out
-	//TODO: make sure replace election timeout with timer
-	rf.electionTimeOut.Reset(RamdomizedElection())
+	//TODO: make sure replace election timeout with timer 
+	args := RequestVoteArgs{Term: rf.currentTerm, CandidateId: rf.me}
 	for i := 0; i < len(rf.peers); i++ {
 		if rf.me == i {
 			continue
 		}
-		go func(counter int) {
-
-			args := RequestVoteArgs{Term: rf.currentTerm, CandidateId: rf.me}
+		go func(counter int) { 
 			reply := RequestVoteReply{}
 			if rf.peers[counter].Call("Raft.RequestVote", &args, &reply) {
 				rf.mu.Lock()
-				defer rf.mu.Lock()
+				defer rf.mu.Unlock()
 				//TODO: Race handling by breaking ?
-				if reply.VoteGranted {
-					voteReceived += 1
-					if voteReceived >= len(rf.peers)/2+1 {
-						fmt.Printf("Server %d : get elected \n", rf.me)
-						rf.role = 2
-						//do heart beat once
-						rf.SendHeartbeat()
-
+				if rf.currentTerm == args.Term && rf.role == 1 {
+					if reply.VoteGranted {
+						voteReceived += 1
+						if voteReceived >= len(rf.peers)/2 + 1 {
+							fmt.Printf("Server %d : get elected \n", rf.me)
+							rf.role = 2
+							rf.heartbeatTimeOut.Reset(StandardHeartBeat())
+						}
+					} else if reply.Term > rf.currentTerm {
+						//goback to follower
+						rf.currentTerm = reply.Term
+						rf.role = 0
 					}
-				} else if reply.Term > rf.currentTerm {
-					//goback to follower
-					rf.currentTerm = reply.Term
-					rf.role = 0
 				}
+				
 			}
 		}(i)
 	}
-	fmt.Printf("Server %d : Get %d vote in %d - need %d\n", rf.me, voteReceived, len(rf.peers), len(rf.peers)/2+1)
 }
 
 // https://go.dev/tour/concurrency/5 : select statement for 2 time out : election time out and heartbeat time out
@@ -322,17 +315,17 @@ func (rf *Raft) ticker() {
 		case <-rf.heartbeatTimeOut.C:
 			rf.mu.Lock()
 			if rf.role == 2 {
-				rf.SendHeartbeat()
+				rf.SendHeartbeat() 
+				rf.heartbeatTimeOut.Reset(StandardHeartBeat())
 			}
 			rf.mu.Unlock()
 		case <-rf.electionTimeOut.C:
+			fmt.Printf("Server %d : ElectionTimeOut\n", rf.me)
 			rf.mu.Lock()
-			if rf.voted == false {
-
-				//change to candidate
-				rf.role = 1
-				rf.StartElection()
-			}
+			//change to candidate
+			rf.role = 1
+			rf.StartElection()
+			rf.electionTimeOut.Reset(RamdomizedElection())
 			rf.mu.Unlock()
 		}
 	}
@@ -407,8 +400,8 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		role:        0,
 		voted:       false,
 		//TODO: Add correct timer usage
-		electionTimeOut:  time.newTimer(RamdomizedElection()),
-		heartbeatTimeOut: time.newTimer(StandardHeartBeat()),
+		electionTimeOut:  time.NewTimer(RamdomizedElection()),
+		heartbeatTimeOut: time.NewTimer(StandardHeartBeat()),
 	}
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
