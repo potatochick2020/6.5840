@@ -388,28 +388,27 @@ func (rf *Raft) ticker() {
 // for any long-running work.
 func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
-	rf := &Raft{
-		peers: peers,
-		persister: persister,
-		me: me,
-		// Your initialization code here (2A, 2B, 2C).
-		//2A
-		currentTerm: 0,
-		role: 0,
-		voted: false,
-		//TODO: Add correct timer usage
-		electionTimeOut = time.newTimer(),
-		heartbeatTimeOut = time.newTimer()
-	}   
+		rf := &Raft{
+			peers: peers,
+			persister: persister,
+			me: me,
+			// Your initialization code here (2A, 2B, 2C).
+			//2A
+			currentTerm: 0,
+			role: 0,
+			voted: false,
+			//TODO: Add correct timer usage
+			electionTimeOut : time.newTimer(),
+			heartbeatTimeOut : time.newTimer(),
+		}
+		// initialize from state persisted before a crash
+		rf.readPersist(persister.ReadRaftState())
 
-	// initialize from state persisted before a crash
-	rf.readPersist(persister.ReadRaftState())
-
-	// start ticker goroutine to start elections
-	go rf.ticker()
-	// start heart beat if it is 
-	return rf
-}
+		// start ticker goroutine to start elections
+		go rf.ticker()
+		// start heart beat if it is 
+		return rf
+	}
 
 //EXAMPLE CODE
 
