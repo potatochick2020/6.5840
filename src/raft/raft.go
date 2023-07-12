@@ -194,16 +194,16 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 type AppendEntriesArgs struct {
 	Term         int           //leader's term
-	leaderId     int           //so follower can redirect clients
-	prevLogIndex int           //index of log entry immediately preceding new ones
-	prevLogTerm  int           //term of prevLogIndex entry
-	entries      []interface{} // log entries to store (empty for heartbeat; may send more than one for efficiency)
-	leaderCommit int           //leader’s commitIndex
+	LeaderId     int           //so follower can redirect clients
+	PrevLogIndex int           //index of log entry immediately preceding new ones
+	PrevLogTerm  int           //term of prevLogIndex entry
+	Entries      []interface{} // log entries to store (empty for heartbeat; may send more than one for efficiency)
+	LeaderCommit int           //leader’s commitIndex
 }
 
 type AppendEntriesReply struct {
 	Term     int  //currentTerm, for leader to update itself
-	leaderId bool //true if follower contained entry matching prevLogIndex and prevLogTerm
+	LeaderId bool //true if follower contained entry matching prevLogIndex and prevLogTerm
 }
 
 // AppendEntries RPC handler
@@ -244,6 +244,19 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 		return 0, 0, false
 	} else {
 		//TODO: Send append entries rpc
+		for i := 0; i < len(rf.peers); i++ {
+			if i != rf.me {
+				go func(counter int) {
+					args := AppendEntriesArgs{}
+					reply := AppendEntriesReply{}
+					//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
+					ok := rf.peers[counter].Call("Raft.AppendEntries", &args, &reply)
+					if !ok {
+						//fmt.Printf("Server %d : Server %d cannot receive heartbeat\n", rf.me, counter)
+					}
+				}(i)
+			}
+		}
 	}
 	index := rf.commitIndex
 	term := -1
