@@ -50,6 +50,12 @@ type ApplyMsg struct {
 	SnapshotIndex int
 }
 
+// Log entry
+type Log struct {
+	Term    int
+	Command interface{}
+}
+
 // A Go object implementing a single Raft peer.
 type Raft struct {
 	mu        sync.Mutex          // Lock to protect shared access to this peer's state
@@ -69,11 +75,12 @@ type Raft struct {
 	electionTimeOut  *time.Timer
 	heartbeatTimeOut *time.Timer
 	//2B
-	log         []interface{} // as Index is start from 1 from figure 2
-	commitIndex int
-	lastApplied int
-	nextIndex   []int
-	matchIndex  []int
+	logs         []Log // as Index is start from 1 from figure 2
+	commitIndex  int
+	lastApplied  int
+	nextIndex    []int
+	matchIndex   []int
+	applyChannel chan ApplyMsg
 }
 
 func StandardHeartBeat() time.Duration {
@@ -81,7 +88,7 @@ func StandardHeartBeat() time.Duration {
 }
 
 func RamdomizedElection() time.Duration {
-	return time.Duration(60 + (rand.Int63()%300)) * time.Millisecond
+	return time.Duration(60+(rand.Int63()%300)) * time.Millisecond
 }
 
 // return currentTerm and whether this server
@@ -216,22 +223,30 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	// Continue if this is not a heart beat message
 	if len(args.Entries) > 0 {
 		//1. Reply false if term < currentTerm (§5.1)
-		if args.Term < rf.currentTerm {
-			reply.Term = rf.currentTerm
-			reply.Success = false
-			return
-		}
+		// if args.Term < rf.currentTerm {
+		// 	reply.Term = rf.currentTerm
+		// 	reply.Success = false
+		// 	return
+		// }
 		//2. Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)
-		if args.Term == rf.currentTerm && len(rf.log) < args.PrevLogIndex {
-			reply.Term = rf.currentTerm
-			reply.Success = false
-			return
-		}
+		// if args.Term == rf.currentTerm && rf.lastApplied < args.PrevLogIndex {
+		// 	reply.Term = rf.currentTerm
+		// 	reply.Success = false
+		// 	return
+		// }
 		//3. If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)
 		//4. Append any new entries not already in the log
 		//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
-		
+
+		//return success and commit to LOG
+		rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[0]})
 		//TODO: Send an APPLY MSG to himself
+		go func(command interface{}, index int) {
+			rf.applyChannel <- ApplyMsg{CommandValid: true, Command: command, CommandIndex: index}
+		}(rf.logs[rf.lastApplied].Command, rf.lastApplied)
+		reply.Success = true
+		reply.Term = rf.currentTerm
+		return
 	}
 }
 
@@ -251,36 +266,46 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	// Your code here (2B).
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	DPrintf("Server %d Role %d: Received command - %T || %v \n", rf.me , rf.role , command, command) 
-	if rf.role != 2 {
-		return 0, rf.currentTerm, false
-	} else {
+	DPrintf("Server %d Role %d: Received command - %T || %v \n", rf.me, rf.role, command, command)
+	if rf.role == 2 {
 		//TODO: Send append entries rpc
-
 		args := AppendEntriesArgs{
 			Term:         rf.currentTerm,
 			LeaderId:     rf.me,
-			PrevLogIndex: 0, //TODO: fill this later -> match index
-			PrevLogTerm:  0, //TODO: fill this later 
+			PrevLogIndex: rf.lastApplied,
+			PrevLogTerm:  rf.logs[rf.lastApplied].Term,
 			Entries:      []interface{}{command},
 			LeaderCommit: rf.commitIndex,
 		}
+		rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: command})
+		rf.lastApplied = rf.lastApplied + 1
+		AppendEntriesSuccessCount := 0
+		Committed := false
 		for i := 0; i < len(rf.peers); i++ {
 			if i != rf.me {
 				go func(counter int) {
-
 					reply := AppendEntriesReply{}
 					//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
-					ok := rf.peers[counter].Call("Raft.AppendEntries", &args, &reply)
-					if !ok {
-						//fmt.Printf("Server %d : Server %d cannot receive heartbeat\n", rf.me, counter)
+					if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
+						if reply.Success == true && !Committed {
+							AppendEntriesSuccessCount++
+							if AppendEntriesSuccessCount > len(rf.peers)/2 {
+								applyMessage := ApplyMsg{CommandValid: true, Command: command, CommandIndex: rf.lastApplied}
+								rf.applyChannel <- applyMessage
+								Committed = true
+							}
+						}
 					}
 				}(i)
 			}
 		}
-		//TODO: IF majority of append entries reply success then commit 
-		return rf.lastApplied, rf.currentTerm, true
+		//TODO: IF majority of append entries reply success then commit
+		if Committed {
+			return rf.lastApplied, rf.currentTerm, true
+		}
 	}
+
+	return 0, rf.currentTerm, false
 
 }
 
@@ -350,7 +375,8 @@ func (rf *Raft) StartElection() {
 							rf.heartbeatTimeOut.Reset(StandardHeartBeat())
 						}
 					} else if reply.Term > rf.currentTerm {
-						//TODO: reinitialize nextIndex and matchIndex array
+						rf.nextIndex = make([]int, rf.lastApplied)
+						rf.matchIndex = make([]int, 0)
 						rf.currentTerm = reply.Term
 						rf.role = 0
 					}
@@ -412,11 +438,13 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		heartbeatTimeOut: time.NewTimer(StandardHeartBeat()),
 		//2B
 		//TODO: add last index term,
-		log:         make([]interface{}, 0),
+		logs:        make([]Log, 0),
 		commitIndex: 0,
 		lastApplied: 0,
 		nextIndex:   make([]int, len(peers)),
 		matchIndex:  make([]int, len(peers)),
+		//Apply ch for sending apply msg
+		applyChannel: applyCh,
 	}
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
