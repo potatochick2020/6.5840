@@ -219,7 +219,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	rf.electionTimeOut.Reset(RamdomizedElection())
-	rf.role = 0
+	rf.role = 0 
 	// Continue if this is not a heart beat message
 	if len(args.Entries) > 0 {
 		//1. Reply false if term < currentTerm (§5.1)
@@ -238,12 +238,16 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		//4. Append any new entries not already in the log
 		//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
 
-		//return success and commit to LOG
-		rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[0]})
+		//return success and commit to LOG 
+		rf.logs = append(rf.logs,Log{Term: rf.currentTerm, Command: args.Entries[0]})
+		rf.lastApplied++
+		DPrintf("Server %d : Get AppendEntries RPC %t", rf.me, rf.logs[rf.lastApplied].Command)
 		//TODO: Send an APPLY MSG to himself
-		go func(command interface{}, index int) {
-			rf.applyChannel <- ApplyMsg{CommandValid: true, Command: command, CommandIndex: index}
-		}(rf.logs[rf.lastApplied].Command, rf.lastApplied)
+		// go func(command interface{}, index int) {
+		// 	rf.applyChannel <- ApplyMsg{CommandValid: true, Command: command, CommandIndex: index}
+		// }(rf.logs[rf.lastApplied].Command, rf.lastApplied)
+
+		rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[rf.lastApplied].Command, CommandIndex: rf.lastApplied}
 		reply.Success = true
 		reply.Term = rf.currentTerm
 		return
@@ -265,8 +269,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	// Your code here (2B).
 	rf.mu.Lock()
-	defer rf.mu.Unlock()
-	DPrintf("Server %d Role %d: Received command - %T || %v \n", rf.me, rf.role, command, command)
+	defer rf.mu.Unlock() 
 	if rf.role == 2 {
 		//TODO: Send append entries rpc
 		args := AppendEntriesArgs{
@@ -287,6 +290,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 					reply := AppendEntriesReply{}
 					//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
 					if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
+						rf.mu.Lock()
+						defer rf.mu.Unlock() 
 						if !Committed {
 							if reply.Success == true {
 								AppendEntriesSuccessCount++
