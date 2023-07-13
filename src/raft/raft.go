@@ -77,11 +77,11 @@ type Raft struct {
 }
 
 func StandardHeartBeat() time.Duration {
-	return 50 * time.Millisecond
+	return 30 * time.Millisecond
 }
 
 func RamdomizedElection() time.Duration {
-	return time.Duration(100+(rand.Int63()%600)) * time.Millisecond
+	return time.Duration(60 + (rand.Int63()%300)) * time.Millisecond
 }
 
 // return currentTerm and whether this server
@@ -214,22 +214,23 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	rf.electionTimeOut.Reset(RamdomizedElection())
 	rf.role = 0
 	// Continue if this is not a heart beat message
-	if len(AppendEntriesArgs.Entries) > 0 {
+	if len(args.Entries) > 0 {
 		//1. Reply false if term < currentTerm (§5.1)
-		if AppendEntriesArgs.Term < rf.currentTerm {
-			AppendEntriesReply.Term = rf.currentTerm
-			AppendEntriesReply.Success = false
+		if args.Term < rf.currentTerm {
+			reply.Term = rf.currentTerm
+			reply.Success = false
 			return
 		}
 		//2. Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)
-		if AppendEntriesArgs.Term == rf.currentTerm && len(rf.log) < AppendEntriesArgs.PrevLogIndex {
-			AppendEntriesReply.Term = rf.currentTerm
-			AppendEntriesReply.Success = false
+		if args.Term == rf.currentTerm && len(rf.log) < args.PrevLogIndex {
+			reply.Term = rf.currentTerm
+			reply.Success = false
 			return
 		}
 		//3. If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)
 		//4. Append any new entries not already in the log
 		//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
+		
 		//TODO: Send an APPLY MSG to himself
 	}
 }
@@ -250,15 +251,17 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	// Your code here (2B).
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	DPrintf("Server %d Role %d: Received command - %T || %v \n", rf.me , rf.role , command, command) 
 	if rf.role != 2 {
 		return 0, rf.currentTerm, false
 	} else {
 		//TODO: Send append entries rpc
+
 		args := AppendEntriesArgs{
 			Term:         rf.currentTerm,
 			LeaderId:     rf.me,
-			PrevLogIndex: 0, //TODO: fill this later
-			PrevLogTerm:  0, //TODO: fill this later
+			PrevLogIndex: 0, //TODO: fill this later -> match index
+			PrevLogTerm:  0, //TODO: fill this later 
 			Entries:      []interface{}{command},
 			LeaderCommit: rf.commitIndex,
 		}
@@ -275,6 +278,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 				}(i)
 			}
 		}
+		//TODO: IF majority of append entries reply success then commit 
 		return rf.lastApplied, rf.currentTerm, true
 	}
 
