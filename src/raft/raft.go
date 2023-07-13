@@ -69,7 +69,7 @@ type Raft struct {
 	electionTimeOut  *time.Timer
 	heartbeatTimeOut *time.Timer
 	//2B
-	log         []interface{}
+	log         []interface{} // as Index is start from 1 from figure 2
 	commitIndex int
 	lastApplied int
 	nextIndex   []int
@@ -202,27 +202,36 @@ type AppendEntriesArgs struct {
 }
 
 type AppendEntriesReply struct {
-	Term     int  //currentTerm, for leader to update itself
-	LeaderId bool //true if follower contained entry matching prevLogIndex and prevLogTerm
+	Term    int  //currentTerm, for leader to update itself
+	Success bool //true if follower contained entry matching prevLogIndex and prevLogTerm
 }
 
 // AppendEntries RPC handler
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
-	/*TODO:
-	1. Reply false if term < currentTerm (§5.1)
-	2. Reply false if log doesn’t contain an entry at prevLogIndex
-	whose term matches prevLogTerm (§5.3)
-	3. If an existing entry conflicts with a new one (same index
-	but different terms), delete the existing entry and all that
-	follow it (§5.3)
-	4. Append any new entries not already in the log
-	5. If leaderCommit > commitIndex, set commitIndex =
-	min(leaderCommit, index of last new entry
-	*/
+	/*TODO:*/
 	rf.mu.Lock()
+	defer rf.mu.Unlock()
 	rf.electionTimeOut.Reset(RamdomizedElection())
 	rf.role = 0
-	rf.mu.Unlock()
+	// Continue if this is not a heart beat message
+	if len(AppendEntriesArgs.Entries) > 0 {
+		//1. Reply false if term < currentTerm (§5.1)
+		if AppendEntriesArgs.Term < rf.currentTerm {
+			AppendEntriesReply.Term = rf.currentTerm
+			AppendEntriesReply.Success = false
+			return
+		}
+		//2. Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)
+		if AppendEntriesArgs.Term == rf.currentTerm && len(rf.log) < AppendEntriesArgs.PrevLogIndex {
+			AppendEntriesReply.Term = rf.currentTerm
+			AppendEntriesReply.Success = false
+			return
+		}
+		//3. If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)
+		//4. Append any new entries not already in the log
+		//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
+		//TODO: Send an APPLY MSG to himself
+	}
 }
 
 // the service using Raft (e.g. a k/v server) wants to start
@@ -238,16 +247,25 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 // term. the third return value is true if this server believes it is
 // the leader.
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
+	// Your code here (2B).
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	if rf.role != 2 {
-		return 0, 0, false
+		return 0, rf.currentTerm, false
 	} else {
 		//TODO: Send append entries rpc
+		args := AppendEntriesArgs{
+			Term:         rf.currentTerm,
+			LeaderId:     rf.me,
+			PrevLogIndex: 0, //TODO: fill this later
+			PrevLogTerm:  0, //TODO: fill this later
+			Entries:      []interface{}{command},
+			LeaderCommit: rf.commitIndex,
+		}
 		for i := 0; i < len(rf.peers); i++ {
 			if i != rf.me {
 				go func(counter int) {
-					args := AppendEntriesArgs{}
+
 					reply := AppendEntriesReply{}
 					//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
 					ok := rf.peers[counter].Call("Raft.AppendEntries", &args, &reply)
@@ -257,14 +275,9 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 				}(i)
 			}
 		}
+		return rf.lastApplied, rf.currentTerm, true
 	}
-	index := rf.commitIndex
-	term := -1
-	isLeader := true
 
-	// Your code here (2B).
-
-	return index, term, isLeader
 }
 
 // the tester doesn't halt goroutines created by Raft after each test,
@@ -333,7 +346,7 @@ func (rf *Raft) StartElection() {
 							rf.heartbeatTimeOut.Reset(StandardHeartBeat())
 						}
 					} else if reply.Term > rf.currentTerm {
-						//("Server %d : Change current Term as reply\n", rf.me)
+						//TODO: reinitialize nextIndex and matchIndex array
 						rf.currentTerm = reply.Term
 						rf.role = 0
 					}
