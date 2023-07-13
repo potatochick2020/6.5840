@@ -287,14 +287,18 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 					reply := AppendEntriesReply{}
 					//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
 					if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
-						if reply.Success == true && !Committed {
-							AppendEntriesSuccessCount++
-							if AppendEntriesSuccessCount > len(rf.peers)/2 {
-								applyMessage := ApplyMsg{CommandValid: true, Command: command, CommandIndex: rf.lastApplied}
-								rf.applyChannel <- applyMessage
-								Committed = true
+						if !Committed {
+							if reply.Success == true {
+								AppendEntriesSuccessCount++
+								if AppendEntriesSuccessCount > len(rf.peers)/2 {
+									applyMessage := ApplyMsg{CommandValid: true, Command: command, CommandIndex: rf.lastApplied}
+									rf.applyChannel <- applyMessage
+									Committed = true
+								}
 							}
 						}
+						rf.nextIndex[counter]++
+						rf.matchIndex[counter]++
 					}
 				}(i)
 			}
@@ -446,6 +450,9 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		//Apply ch for sending apply msg
 		applyChannel: applyCh,
 	}
+	//add initiate dummy log
+	rf.logs = append(rf.logs, Log{Term: 0, Command: nil})
+
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 
