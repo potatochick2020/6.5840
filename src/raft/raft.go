@@ -16,12 +16,12 @@ package raft
 //   should send an ApplyMsg to the service (or tester)
 //   in the same server.
 //
-
+import "github.com/sasha-s/go-deadlock"
 import (
 	//	"bytes"
 	//"fmt"
 	"math/rand"
-	"sync"
+//	"sync"
 	"sync/atomic"
 	"time"
 
@@ -58,7 +58,8 @@ type Log struct {
 
 // A Go object implementing a single Raft peer.
 type Raft struct {
-	mu        sync.Mutex          // Lock to protect shared access to this peer's state
+	mu        deadlock.Mutex          // Lock to protect shared access to this peer's state
+	peersMu   []deadlock.Mutex        // Lock to protect shared access to other peer's state
 	peers     []*labrpc.ClientEnd // RPC end points of all peers
 	persister *Persister          // Object to hold this peer's persisted state
 	me        int                 // this peer's index into peers[]
@@ -243,13 +244,12 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		rf.lastApplied++
 		DPrintf("Server %d : Get AppendEntries RPC %t", rf.me, rf.logs[rf.lastApplied].Command)
 		//TODO: Send an APPLY MSG to himself
-		// go func(command interface{}, index int) {
-		// 	rf.applyChannel <- ApplyMsg{CommandValid: true, Command: command, CommandIndex: index}
-		// }(rf.logs[rf.lastApplied].Command, rf.lastApplied)
-
+	
 		rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[rf.lastApplied].Command, CommandIndex: rf.lastApplied}
-		reply.Success = true
-		reply.Term = rf.currentTerm
+	
+		DPrintf("Server %d : Send Apply Message, return success %t", rf.me, rf.logs[rf.lastApplied].Command)
+		 
+		reply.Term, reply.Success = rf.currentTerm, true
 		return
 	}
 }
@@ -266,55 +266,74 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 // if it's ever committed. the second return value is the current
 // term. the third return value is true if this server believes it is
 // the leader.
+func (rf *Raft) AppendNewEntry(command interface{}) {
+	//TODO: Send append entries rpc
+	args := AppendEntriesArgs{
+		Term:         rf.currentTerm,
+		LeaderId:     rf.me,
+		PrevLogIndex: rf.lastApplied,
+		PrevLogTerm:  rf.logs[rf.lastApplied].Term,
+		Entries:      []interface{}{command},
+		LeaderCommit: rf.commitIndex,
+	}
+	rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: command})
+	rf.lastApplied = rf.lastApplied + 1
+	
+	DPrintf("Server %d : wg size %d", rf.me, len(rf.peers)-1)
+	//Committed := false
+	c := make(chan int)
+	for i := 0; i < len(rf.peers); i++ {
+		if i != rf.me {
+			go func(counter int, self int) { 
+				reply := AppendEntriesReply{}
+				//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
+				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) { 
+					defer DPrintf("Server %d : Server %d replied %+v", self, counter, reply) 
+					if reply.Success == true {  
+						c <- 1 
+					} else {
+						c <- 2
+					}
+					rf.peersMu[counter].Lock()
+					rf.nextIndex[counter]++
+					rf.matchIndex[counter]++  
+					rf.peersMu[counter].Unlock()
+				} 
+			}(i, rf.me)
+		}
+	}
+	AppendEntriesSuccessCount := 0
+	AppenEntriesFailCount := 0
+	for { 
+		switch <- c {
+		case 1 :
+			AppendEntriesSuccessCount++
+		case 2 :
+			AppenEntriesFailCount++
+		}
+		if AppendEntriesSuccessCount >  len(rf.peers) / 2 { 
+			applyMessage := ApplyMsg{CommandValid: true, Command: command, CommandIndex: rf.lastApplied}
+			rf.applyChannel <- applyMessage
+			break;
+		}
+		if AppendEntriesSuccessCount + AppenEntriesFailCount > len(rf.peers) {
+			break;
+		}
+	}
+	DPrintf("Server %d : Check Wait", rf.me)
+	//TODO: IF majority of append entries reply success then commit 
+
+	return
+}
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	// Your code here (2B).
 	rf.mu.Lock()
 	defer rf.mu.Unlock() 
 	if rf.role == 2 {
-		//TODO: Send append entries rpc
-		args := AppendEntriesArgs{
-			Term:         rf.currentTerm,
-			LeaderId:     rf.me,
-			PrevLogIndex: rf.lastApplied,
-			PrevLogTerm:  rf.logs[rf.lastApplied].Term,
-			Entries:      []interface{}{command},
-			LeaderCommit: rf.commitIndex,
-		}
-		rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: command})
-		rf.lastApplied = rf.lastApplied + 1
-		AppendEntriesSuccessCount := 0
-		Committed := false
-		for i := 0; i < len(rf.peers); i++ {
-			if i != rf.me {
-				go func(counter int) {
-					reply := AppendEntriesReply{}
-					//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
-					if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
-						rf.mu.Lock()
-						defer rf.mu.Unlock() 
-						if !Committed {
-							if reply.Success == true {
-								AppendEntriesSuccessCount++
-								if AppendEntriesSuccessCount > len(rf.peers)/2 {
-									applyMessage := ApplyMsg{CommandValid: true, Command: command, CommandIndex: rf.lastApplied}
-									rf.applyChannel <- applyMessage
-									Committed = true
-								}
-							}
-						}
-						rf.nextIndex[counter]++
-						rf.matchIndex[counter]++
-					}
-				}(i)
-			}
-		}
-		//TODO: IF majority of append entries reply success then commit
-		if Committed {
-			return rf.lastApplied, rf.currentTerm, true
-		}
+		rf.AppendNewEntry(command)
+		return rf.lastApplied, rf.currentTerm, true
 	}
-
-	return 0, rf.currentTerm, false
+	return -1,-1, false
 
 }
 
@@ -343,11 +362,11 @@ func (rf *Raft) SendHeartbeat() {
 		if i != rf.me {
 			go func(counter int) {
 				args := AppendEntriesArgs{}
-				reply := AppendEntriesReply{}
-				//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
-				ok := rf.peers[counter].Call("Raft.AppendEntries", &args, &reply)
-				if !ok {
-					//fmt.Printf("Server %d : Server %d cannot receive heartbeat\n", rf.me, counter)
+				reply := AppendEntriesReply{} 
+				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
+					DPrintf("Server %d : Server %d received heartbeat", rf.me, counter) 
+				} else {
+					DPrintf("Server %d : Server %d did not received heartbeat", rf.me, counter)
 				}
 			}(i)
 		}
@@ -382,12 +401,10 @@ func (rf *Raft) StartElection() {
 						if voteReceived >= len(rf.peers)/2+1 {
 							rf.role = 2
 							rf.heartbeatTimeOut.Reset(StandardHeartBeat())
+							rf.nextIndex, rf.matchIndex = make([]int, rf.lastApplied), make([]int, 0)
 						}
 					} else if reply.Term > rf.currentTerm {
-						rf.nextIndex = make([]int, rf.lastApplied)
-						rf.matchIndex = make([]int, 0)
-						rf.currentTerm = reply.Term
-						rf.role = 0
+						rf.currentTerm, rf.role = reply.Term, 0
 					}
 				}
 
@@ -447,6 +464,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		heartbeatTimeOut: time.NewTimer(StandardHeartBeat()),
 		//2B
 		//TODO: add last index term,
+		peersMu:     make([]deadlock.Mutex, len(peers)),
 		logs:        make([]Log, 0),
 		commitIndex: 0,
 		lastApplied: 0,
