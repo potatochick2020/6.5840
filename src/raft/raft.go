@@ -16,18 +16,21 @@ package raft
 //   should send an ApplyMsg to the service (or tester)
 //   in the same server.
 //
-import "github.com/sasha-s/go-deadlock"
 import (
-	//	"bytes"
-	//"fmt"
 	"math/rand"
-//	"sync"
 	"sync/atomic"
 	"time"
 
-	//	"6.5840/labgob"
 	"6.5840/labrpc"
+	"github.com/sasha-s/go-deadlock"
 )
+
+//	"bytes"
+//"fmt"
+
+//	"sync"
+
+//	"6.5840/labgob"
 
 // as each Raft peer becomes aware that successive log entries are
 // committed, the peer should send an ApplyMsg to the service (or
@@ -58,8 +61,8 @@ type Log struct {
 
 // A Go object implementing a single Raft peer.
 type Raft struct {
-	mu        deadlock.Mutex          // Lock to protect shared access to this peer's state
-	peersMu   []deadlock.Mutex        // Lock to protect shared access to other peer's state
+	mu        deadlock.Mutex      // Lock to protect shared access to this peer's state
+	peersMu   []deadlock.Mutex    // Lock to protect shared access to other peer's state
 	peers     []*labrpc.ClientEnd // RPC end points of all peers
 	persister *Persister          // Object to hold this peer's persisted state
 	me        int                 // this peer's index into peers[]
@@ -89,7 +92,7 @@ func StandardHeartBeat() time.Duration {
 }
 
 func RamdomizedElection() time.Duration {
-	return time.Duration(60+(rand.Int63()%300)) * time.Millisecond
+	return time.Duration(50+(rand.Int63()%300)) * time.Millisecond
 }
 
 // return currentTerm and whether this server
@@ -175,28 +178,20 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here (2A, 2B).
 	//TODO: add logic about vote 2B
 	//2A
+	DPrintf2A("Server %d : Received Requested Vote args %+v from Server %d\n", rf.me, args, args.CandidateId)
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
-	if args.Term > rf.currentTerm {
-		rf.currentTerm = args.Term
-		//("Server %d : Change current Term in RequestVote Args\n", rf.me)
-		rf.voted = false
-		return
-	}
-
-	if args.Term >= rf.currentTerm && rf.voted == false {
+	if args.Term > rf.currentTerm || (args.Term == rf.currentTerm && !rf.voted) {
 		//TODO: add if candidate’s log is at least as up-to-date as receiver’s log, grant vote
-		reply.VoteGranted = true
-		reply.Term = rf.currentTerm
-		//fmt.Printf("Server %d : Voted to Server %d\n", rf.me, args.CandidateId)
-		rf.voted = true
-		rf.votedFor = args.CandidateId
+		reply.VoteGranted, reply.Term = true, rf.currentTerm
+		rf.voted, rf.votedFor, rf.currentTerm = true, args.CandidateId, args.Term
 		rf.electionTimeOut.Reset(RamdomizedElection())
+		DPrintf2A("Server %d : Voted to Server %d\n", rf.me, args.CandidateId)
 	} else {
+		reply.VoteGranted, reply.Term = false, rf.currentTerm
 		reply.VoteGranted = false
-		reply.Term = rf.currentTerm
-		//fmt.Printf("Server %d : Did Not Voted to Server %d\n", rf.me, args.CandidateId)
+		DPrintf2A("Server %d : Did Not Voted to Server %d\n", rf.me, args.CandidateId)
 	}
 }
 
@@ -217,10 +212,11 @@ type AppendEntriesReply struct {
 // AppendEntries RPC handler
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	/*TODO:*/
+
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	rf.electionTimeOut.Reset(RamdomizedElection())
-	rf.role = 0 
+	rf.role = 0
 	// Continue if this is not a heart beat message
 	if len(args.Entries) > 0 {
 		//1. Reply false if term < currentTerm (§5.1)
@@ -239,16 +235,16 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		//4. Append any new entries not already in the log
 		//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
 
-		//return success and commit to LOG 
-		rf.logs = append(rf.logs,Log{Term: rf.currentTerm, Command: args.Entries[0]})
+		//return success and commit to LOG
+		rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[0]})
 		rf.lastApplied++
-		DPrintf("Server %d : Get AppendEntries RPC %t", rf.me, rf.logs[rf.lastApplied].Command)
+		DPrintf2B("Server %d : Get AppendEntries RPC %t", rf.me, rf.logs[rf.lastApplied].Command)
 		//TODO: Send an APPLY MSG to himself
-	
+
 		rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[rf.lastApplied].Command, CommandIndex: rf.lastApplied}
-	
-		DPrintf("Server %d : Send Apply Message, return success %t", rf.me, rf.logs[rf.lastApplied].Command)
-		 
+
+		DPrintf2B("Server %d : Send Apply Message, return success %t", rf.me, rf.logs[rf.lastApplied].Command)
+
 		reply.Term, reply.Success = rf.currentTerm, true
 		return
 	}
@@ -278,62 +274,59 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 	}
 	rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: command})
 	rf.lastApplied = rf.lastApplied + 1
-	
-	DPrintf("Server %d : wg size %d", rf.me, len(rf.peers)-1)
 	//Committed := false
 	c := make(chan int)
 	for i := 0; i < len(rf.peers); i++ {
 		if i != rf.me {
-			go func(counter int, self int) { 
+			go func(counter int, self int) {
 				reply := AppendEntriesReply{}
-				//fmt.Printf("Server %d : Send HeartBeat to Server %d \n", rf.me, counter)
-				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) { 
-					defer DPrintf("Server %d : Server %d replied %+v", self, counter, reply) 
-					if reply.Success == true {  
-						c <- 1 
+				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
+					defer DPrintf2B("Server %d : Server %d replied %+v", self, counter, reply)
+					if reply.Success {
+						c <- 1
 					} else {
 						c <- 2
 					}
 					rf.peersMu[counter].Lock()
 					rf.nextIndex[counter]++
-					rf.matchIndex[counter]++  
+					rf.matchIndex[counter]++
 					rf.peersMu[counter].Unlock()
-				} 
+				}
 			}(i, rf.me)
 		}
 	}
 	AppendEntriesSuccessCount := 0
 	AppenEntriesFailCount := 0
-	for { 
-		switch <- c {
-		case 1 :
+	for {
+		switch <-c {
+		case 1:
 			AppendEntriesSuccessCount++
-		case 2 :
+		case 2:
 			AppenEntriesFailCount++
 		}
-		if AppendEntriesSuccessCount >  len(rf.peers) / 2 { 
+		if AppendEntriesSuccessCount > len(rf.peers)/2 {
 			applyMessage := ApplyMsg{CommandValid: true, Command: command, CommandIndex: rf.lastApplied}
 			rf.applyChannel <- applyMessage
-			break;
+			break
 		}
-		if AppendEntriesSuccessCount + AppenEntriesFailCount > len(rf.peers) {
-			break;
+		if AppendEntriesSuccessCount+AppenEntriesFailCount > len(rf.peers) {
+			break
 		}
 	}
-	DPrintf("Server %d : Check Wait", rf.me)
-	//TODO: IF majority of append entries reply success then commit 
+	DPrintf2B("Server %d : Check Wait", rf.me)
+	//TODO: IF majority of append entries reply success then commit
 
 	return
 }
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	// Your code here (2B).
 	rf.mu.Lock()
-	defer rf.mu.Unlock() 
+	defer rf.mu.Unlock()
 	if rf.role == 2 {
 		rf.AppendNewEntry(command)
 		return rf.lastApplied, rf.currentTerm, true
 	}
-	return -1,-1, false
+	return -1, -1, false
 
 }
 
@@ -362,11 +355,11 @@ func (rf *Raft) SendHeartbeat() {
 		if i != rf.me {
 			go func(counter int) {
 				args := AppendEntriesArgs{}
-				reply := AppendEntriesReply{} 
+				reply := AppendEntriesReply{}
 				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
-					DPrintf("Server %d : Server %d received heartbeat", rf.me, counter) 
+					DPrintf2A("Server %d : Server %d received heartbeat", rf.me, counter)
 				} else {
-					DPrintf("Server %d : Server %d did not received heartbeat", rf.me, counter)
+					DPrintf2A("Server %d : Server %d did not received heartbeat", rf.me, counter)
 				}
 			}(i)
 		}
@@ -374,9 +367,8 @@ func (rf *Raft) SendHeartbeat() {
 }
 
 func (rf *Raft) StartElection() {
+	DPrintf2A("Server %d : Start Election", rf.me)
 	//request vote
-	//fmt.Printf("Server %d : RequestVote \n", rf.me)
-	//("Server %d : Change current Term as start election\n", rf.me)
 	rf.currentTerm += 1
 	voteReceived := 1
 	rf.voted = true
@@ -393,15 +385,20 @@ func (rf *Raft) StartElection() {
 		go func(counter int) {
 			reply := RequestVoteReply{}
 			if rf.peers[counter].Call("Raft.RequestVote", &args, &reply) {
+				DPrintf2A("Server %d : Server %d received heartbeat", rf.me, counter)
 				rf.mu.Lock()
 				defer rf.mu.Unlock()
 				if rf.currentTerm == args.Term && rf.role == 1 {
 					if reply.VoteGranted {
 						voteReceived += 1
 						if voteReceived >= len(rf.peers)/2+1 {
+							DPrintf2A("Server %d : Received majority vote, change to leader", rf.me)
 							rf.role = 2
 							rf.heartbeatTimeOut.Reset(StandardHeartBeat())
-							rf.nextIndex, rf.matchIndex = make([]int, rf.lastApplied), make([]int, 0)
+							rf.nextIndex, rf.matchIndex = make([]int, len(rf.peers)), make([]int, len(rf.peers))
+							for i := range rf.nextIndex {
+								rf.nextIndex[i] = rf.lastApplied
+							}
 						}
 					} else if reply.Term > rf.currentTerm {
 						rf.currentTerm, rf.role = reply.Term, 0
@@ -417,7 +414,7 @@ func (rf *Raft) StartElection() {
 // https://pkg.go.dev/github.com/docker/swarmkit/manager/dispatcher/heartbeat
 
 func (rf *Raft) ticker() {
-	for rf.killed() == false {
+	for !rf.killed() {
 		select {
 		case <-rf.heartbeatTimeOut.C:
 			rf.mu.Lock()
