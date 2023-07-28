@@ -25,6 +25,13 @@ import (
 	"github.com/sasha-s/go-deadlock"
 )
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 //	"bytes"
 //"fmt"
 
@@ -236,14 +243,17 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
 
 		//return success and commit to LOG
-		rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[0]})
-		rf.lastApplied++
-		DPrintf2B("Server %d : Get AppendEntries RPC %t", rf.me, rf.logs[rf.lastApplied].Command)
-		//TODO: Send an APPLY MSG to himself
 
-		rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[rf.lastApplied].Command, CommandIndex: rf.lastApplied}
+		DPrintf2B("Server %d : Get AppendEntries RPC ", rf.me)
+		i := len(args.Entries) - (args.PrevLogIndex - rf.lastApplied + 1)
+		//DPrintf2B("Server %d : i  %d \n", rf.me, i)
+		for ; i < len(args.Entries); i++ {
+			rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[i]})
+			rf.lastApplied++
+			rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[rf.lastApplied].Command, CommandIndex: rf.lastApplied}
+		}
 
-		DPrintf2B("Server %d : Reply AppendEntries RPC with success %t", rf.me, rf.logs[rf.lastApplied].Command)
+		DPrintf2B("Server %d : Reply AppendEntries RPC with success , current log size is %+v", rf.me, len(rf.logs))
 
 		reply.Term, reply.Success = rf.currentTerm, true
 		return
@@ -269,7 +279,7 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 		LeaderId:     rf.me,
 		PrevLogIndex: rf.lastApplied,
 		PrevLogTerm:  rf.logs[rf.lastApplied].Term,
-		Entries:      []interface{}{command},
+		//Entries:      []interface{}{command},
 		LeaderCommit: rf.commitIndex,
 	}
 	rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: command})
@@ -278,23 +288,31 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 	c := make(chan int)
 	for i := 0; i < len(rf.peers); i++ {
 		if i != rf.me {
-			go func(counter int, self int) {
+			go func(counter int, self int, appendArgs AppendEntriesArgs, matchIndex []int, nextIndex []int, lastAppliedindex int) {
+				//add all missing entries to append args
+				appendArgs.Entries = make([]interface{}, lastAppliedindex-matchIndex[counter])
+				for j := 0; j < len(appendArgs.Entries); j++ {
+					appendArgs.Entries[j] = rf.logs[matchIndex[counter]+j+1].Command
+				}
+
 				reply := AppendEntriesReply{}
-				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
-					defer DPrintf2B("Server %d : Server %d replied %+v", self, counter, reply)
+				DPrintf2B("Server %d : Send AppendEntries RPC to Server %d - Len of entries%+v , Leader Match Index : %+v, Leader Next Index : %+v", self, counter, len(appendArgs.Entries), matchIndex, nextIndex)
+				if rf.peers[counter].Call("Raft.AppendEntries", &appendArgs, &reply) {
+					DPrintf2B("Server %d : Server %d replied %+v , lastAppliedIndex %d", self, counter, reply, lastAppliedindex)
 					if reply.Success {
+						rf.peersMu[counter].Lock()
+						rf.nextIndex[counter] = lastAppliedindex + 1
+						rf.matchIndex[counter] = lastAppliedindex
+						rf.peersMu[counter].Unlock()
 						c <- 1
 					} else {
 						c <- 2
 					}
-					rf.peersMu[counter].Lock()
-					rf.nextIndex[counter]++
-					rf.matchIndex[counter]++
-					rf.peersMu[counter].Unlock()
 				} else {
+					DPrintf2B("Server %d : Server %d DID NOT replied", self, counter)
 					c <- 2
 				}
-			}(i, rf.me)
+			}(i, rf.me, args, rf.matchIndex, rf.nextIndex, rf.lastApplied)
 		}
 	}
 	AppendEntriesSuccessCount := 1
