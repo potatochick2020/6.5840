@@ -243,7 +243,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 		rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[rf.lastApplied].Command, CommandIndex: rf.lastApplied}
 
-		DPrintf2B("Server %d : Send Apply Message, return success %t", rf.me, rf.logs[rf.lastApplied].Command)
+		DPrintf2B("Server %d : Reply AppendEntries RPC with success %t", rf.me, rf.logs[rf.lastApplied].Command)
 
 		reply.Term, reply.Success = rf.currentTerm, true
 		return
@@ -291,11 +291,13 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 					rf.nextIndex[counter]++
 					rf.matchIndex[counter]++
 					rf.peersMu[counter].Unlock()
+				} else {
+					c <- 2
 				}
 			}(i, rf.me)
 		}
 	}
-	AppendEntriesSuccessCount := 0
+	AppendEntriesSuccessCount := 1
 	AppenEntriesFailCount := 0
 	for {
 		switch <-c {
@@ -309,13 +311,11 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 			rf.applyChannel <- applyMessage
 			break
 		}
-		if AppendEntriesSuccessCount+AppenEntriesFailCount > len(rf.peers) {
+		if AppenEntriesFailCount > len(rf.peers)/2 {
 			break
 		}
 	}
-	DPrintf2B("Server %d : Check Wait", rf.me)
 	//TODO: IF majority of append entries reply success then commit
-
 	return
 }
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
@@ -323,6 +323,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	if rf.role == 2 {
+		DPrintf2B("Server %d : Send Append Entries RPC , Command %t", rf.me, command)
 		rf.AppendNewEntry(command)
 		return rf.lastApplied, rf.currentTerm, true
 	}
@@ -392,7 +393,7 @@ func (rf *Raft) StartElection() {
 					if reply.VoteGranted {
 						voteReceived += 1
 						if voteReceived >= len(rf.peers)/2+1 {
-							DPrintf2A("Server %d : Received majority vote, change to leader", rf.me)
+							DPrintfAll("Server %d : Received majority vote, change to leader", rf.me)
 							rf.role = 2
 							rf.heartbeatTimeOut.Reset(StandardHeartBeat())
 							rf.nextIndex, rf.matchIndex = make([]int, len(rf.peers)), make([]int, len(rf.peers))
@@ -435,6 +436,7 @@ func (rf *Raft) ticker() {
 			rf.mu.Unlock()
 		}
 	}
+	DPrintfKill("Server %d : Killed", rf.me)
 }
 
 // the service or tester wants to create a Raft server. the ports
