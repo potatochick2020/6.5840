@@ -13,6 +13,9 @@ test=${2^^}
 # loop for the given number of times
 for ((i=1; i<=times; i++))
 do
+  # print the current iteration
+  echo "----------------------------------------" >> result.txt
+  echo "Iteration $i" >> result.txt
   # execute the command and append the output to result.txt
   go test -run $test -race >> result.txt
 done

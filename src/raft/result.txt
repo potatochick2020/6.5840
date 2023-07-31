@@ -1,902 +1,264 @@
+----------------------------------------
+Iteration 1
 Test (2B): basic agreement ...
-2023/07/28 06:53:23 Server 2 : Received majority vote, change to leader
-2023/07/28 06:53:23 Server 2 : Send Append Entries RPC , Command %!t(int=100)
-2023/07/28 06:53:23 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:23 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:23 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:53:23 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:23 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:53:23 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:23 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:23 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
---- FAIL: TestBasicAgree2B (2.11s)
-    config.go:594: one(100) failed to reach agreement
+  ... Passed --   0.4  3   14    3002    3
 Test (2B): RPC byte count ...
-2023/07/28 06:53:25 Server 2 : Killed
-2023/07/28 06:53:26 Server 2 : Received majority vote, change to leader
-2023/07/28 06:53:26 Server 0 : Killed
-2023/07/28 06:53:26 Server 2 : Send Append Entries RPC , Command %!t(int=99)
-2023/07/28 06:53:26 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:26 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:26 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:53:26 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:26 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:53:26 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:26 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:26 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:26 Server 1 : Killed
---- FAIL: TestRPCBytes2B (2.22s)
-    config.go:594: one(99) failed to reach agreement
+  ... Passed --   0.4  3   40  109078   11
 Test (2B): test progressive failure of followers ...
-2023/07/28 06:53:28 Server 2 : Killed
-2023/07/28 06:53:28 Server 2 : Received majority vote, change to leader
-2023/07/28 06:53:28 Server 2 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:53:28 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:28 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:28 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:53:28 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:28 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:53:28 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:28 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:28 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:28 Server 0 : Killed
-2023/07/28 06:53:28 Server 1 : Killed
---- FAIL: TestFollowerFailure2B (2.12s)
-    config.go:594: one(101) failed to reach agreement
+  ... Passed --   9.5  3  422   63073    3
 Test (2B): test failure of leaders ...
-2023/07/28 06:53:30 Server 2 : Killed
-2023/07/28 06:53:30 Server 0 : Received majority vote, change to leader
-2023/07/28 06:53:30 Server 0 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:53:30 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:30 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:30 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:53:30 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:30 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:53:30 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:30 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:30 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:30 Server 1 : Killed
-2023/07/28 06:53:30 Server 0 : Killed
---- FAIL: TestLeaderFailure2B (2.12s)
-    config.go:594: one(101) failed to reach agreement
-2023/07/28 06:53:32 Server 0 : Killed
+==================
+WARNING: DATA RACE
+Write at 0x00c0000dc5c0 by goroutine 1794:
+  6.5840/raft.(*Raft).AppendNewEntry()
+      /workspaces/6.5840/src/raft/raft.go:270 +0x2db
+  6.5840/raft.(*Raft).Start()
+      /workspaces/6.5840/src/raft/raft.go:329 +0x144
+  6.5840/raft.TestLeaderFailure2B()
+      /workspaces/6.5840/src/raft/test_test.go:253 +0x1ba
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1576 +0x216
+  testing.(*T).Run.func1()
+      /usr/local/go/src/testing/testing.go:1629 +0x47
+
+Previous read at 0x00c0000dc5c0 by goroutine 4439:
+  6.5840/raft.(*Raft).SendHeartbeat.func1()
+      /workspaces/6.5840/src/raft/raft.go:366 +0xf0
+  6.5840/raft.(*Raft).SendHeartbeat.func2()
+      /workspaces/6.5840/src/raft/raft.go:375 +0x47
+
+Goroutine 1794 (running) created at:
+  testing.(*T).Run()
+      /usr/local/go/src/testing/testing.go:1629 +0x805
+  testing.runTests.func1()
+      /usr/local/go/src/testing/testing.go:2036 +0x8d
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1576 +0x216
+  testing.runTests()
+      /usr/local/go/src/testing/testing.go:2034 +0x87c
+  testing.(*M).Run()
+      /usr/local/go/src/testing/testing.go:1906 +0xb44
+  main.main()
+      _testmain.go:101 +0x2e9
+
+Goroutine 4439 (running) created at:
+  6.5840/raft.(*Raft).SendHeartbeat()
+      /workspaces/6.5840/src/raft/raft.go:359 +0x15a
+  6.5840/raft.(*Raft).ticker()
+      /workspaces/6.5840/src/raft/raft.go:432 +0x2dc
+  6.5840/raft.Make.func1()
+      /workspaces/6.5840/src/raft/raft.go:490 +0x39
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c0000dc5e0 by goroutine 1794:
+  6.5840/raft.(*Raft).AppendNewEntry()
+      /workspaces/6.5840/src/raft/raft.go:271 +0x358
+  6.5840/raft.(*Raft).Start()
+      /workspaces/6.5840/src/raft/raft.go:329 +0x144
+  6.5840/raft.TestLeaderFailure2B()
+      /workspaces/6.5840/src/raft/test_test.go:253 +0x1ba
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1576 +0x216
+  testing.(*T).Run.func1()
+      /usr/local/go/src/testing/testing.go:1629 +0x47
+
+Previous read at 0x00c0000dc5e0 by goroutine 4439:
+  6.5840/raft.(*Raft).SendHeartbeat.func1()
+      /workspaces/6.5840/src/raft/raft.go:365 +0xcd
+  6.5840/raft.(*Raft).SendHeartbeat.func2()
+      /workspaces/6.5840/src/raft/raft.go:375 +0x47
+
+Goroutine 1794 (running) created at:
+  testing.(*T).Run()
+      /usr/local/go/src/testing/testing.go:1629 +0x805
+  testing.runTests.func1()
+      /usr/local/go/src/testing/testing.go:2036 +0x8d
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1576 +0x216
+  testing.runTests()
+      /usr/local/go/src/testing/testing.go:2034 +0x87c
+  testing.(*M).Run()
+      /usr/local/go/src/testing/testing.go:1906 +0xb44
+  main.main()
+      _testmain.go:101 +0x2e9
+
+Goroutine 4439 (running) created at:
+  6.5840/raft.(*Raft).SendHeartbeat()
+      /workspaces/6.5840/src/raft/raft.go:359 +0x15a
+  6.5840/raft.(*Raft).ticker()
+      /workspaces/6.5840/src/raft/raft.go:432 +0x2dc
+  6.5840/raft.Make.func1()
+      /workspaces/6.5840/src/raft/raft.go:490 +0x39
+==================
+--- FAIL: TestLeaderFailure2B (11.46s)
+    testing.go:1446: race detected during execution of test
 Test (2B): agreement after follower reconnects ...
-2023/07/28 06:53:32 Server 0 : Received majority vote, change to leader
-2023/07/28 06:53:32 Server 0 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:53:32 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:32 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:53:32 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:53:32 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:32 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:53:32 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:32 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:32 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:32 Server 2 : Killed
-2023/07/28 06:53:32 Server 1 : Killed
---- FAIL: TestFailAgree2B (2.11s)
-    config.go:594: one(101) failed to reach agreement
+  ... Passed --   2.7  3  198   39744    7
 Test (2B): no agreement if too many followers disconnect ...
-2023/07/28 06:53:34 Server 0 : Killed
-2023/07/28 06:53:34 Server 1 : Killed
-2023/07/28 06:53:34 Server 0 : Received majority vote, change to leader
-2023/07/28 06:53:34 Server 0 : Send Append Entries RPC , Command %!t(int=10)
-2023/07/28 06:53:34 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:53:34 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:53:34 Server 0 : Send AppendEntries RPC to Server 3 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:53:34 Server 0 : Send AppendEntries RPC to Server 4 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:53:34 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:53:34 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:34 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:53:34 Server 4 : Get AppendEntries RPC 
-2023/07/28 06:53:34 Server 4 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:34 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:34 Server 3 : Get AppendEntries RPC 
-2023/07/28 06:53:34 Server 3 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:53:34 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:34 Server 0 : Server 4 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:34 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:34 Server 0 : Server 3 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:53:34 Server 2 : Killed
-signal: interrupt
-FAIL	6.5840/raft	12.358s
-Test (2B): basic agreement ...
-2023/07/28 06:58:33 Server 1 : Received majority vote, change to leader
-2023/07/28 06:58:33 Server 1 : Send Append Entries RPC , Command %!t(int=100)
-2023/07/28 06:58:33 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:33 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:33 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:33 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:33 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:58:33 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:33 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:33 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
---- FAIL: TestBasicAgree2B (2.17s)
-    config.go:594: one(100) failed to reach agreement
-Test (2B): RPC byte count ...
-2023/07/28 06:58:35 Server 1 : Killed
-2023/07/28 06:58:35 Server 0 : Killed
-2023/07/28 06:58:35 Server 2 : Killed
-2023/07/28 06:58:35 Server 2 : Received majority vote, change to leader
-2023/07/28 06:58:35 Server 2 : Send Append Entries RPC , Command %!t(int=99)
-2023/07/28 06:58:35 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:35 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:35 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:35 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:35 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:58:35 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:35 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:35 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
---- FAIL: TestRPCBytes2B (2.16s)
-    config.go:594: one(99) failed to reach agreement
-Test (2B): test progressive failure of followers ...
-2023/07/28 06:58:37 Server 2 : Killed
-2023/07/28 06:58:37 Server 0 : Killed
-2023/07/28 06:58:37 Server 2 : Received majority vote, change to leader
-2023/07/28 06:58:37 Server 2 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:58:37 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:37 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:37 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:58:37 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:37 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:37 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:37 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:37 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:37 Server 1 : Killed
---- FAIL: TestFollowerFailure2B (2.17s)
-    config.go:594: one(101) failed to reach agreement
-2023/07/28 06:58:39 Server 2 : Killed
-Test (2B): test failure of leaders ...
-2023/07/28 06:58:39 Server 0 : Received majority vote, change to leader
-2023/07/28 06:58:39 Server 1 : Killed
-2023/07/28 06:58:39 Server 0 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:58:39 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:39 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:39 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:39 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:39 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:39 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:39 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:39 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:39 Server 0 : Killed
---- FAIL: TestLeaderFailure2B (2.17s)
-    config.go:594: one(101) failed to reach agreement
-Test (2B): agreement after follower reconnects ...
-2023/07/28 06:58:41 Server 0 : Killed
-2023/07/28 06:58:41 Server 1 : Received majority vote, change to leader
-2023/07/28 06:58:41 Server 1 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:58:41 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:41 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:41 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:58:41 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:41 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:41 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:41 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:41 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:41 Server 1 : Killed
-2023/07/28 06:58:41 Server 2 : Killed
---- FAIL: TestFailAgree2B (2.12s)
-    config.go:594: one(101) failed to reach agreement
-Test (2B): no agreement if too many followers disconnect ...
-2023/07/28 06:58:43 Server 1 : Killed
-2023/07/28 06:58:43 Server 0 : Killed
-2023/07/28 06:58:43 Server 0 : Received majority vote, change to leader
-2023/07/28 06:58:43 Server 2 : Killed
-2023/07/28 06:58:43 Server 0 : Send Append Entries RPC , Command %!t(int=10)
-2023/07/28 06:58:43 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:58:43 Server 0 : Send AppendEntries RPC to Server 3 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:58:43 Server 0 : Send AppendEntries RPC to Server 4 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:58:43 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:58:43 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:43 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:43 Server 3 : Get AppendEntries RPC 
-2023/07/28 06:58:43 Server 3 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:43 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:43 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:43 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:43 Server 4 : Get AppendEntries RPC 
-2023/07/28 06:58:43 Server 4 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:43 Server 0 : Server 3 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:43 Server 0 : Server 4 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:43 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
---- FAIL: TestFailNoAgree2B (2.12s)
-    config.go:594: one(10) failed to reach agreement
+==================
+WARNING: DATA RACE
+Write at 0x00c00023a750 by goroutine 7111:
+  6.5840/raft.(*Raft).RequestVote()
+      /workspaces/6.5840/src/raft/raft.go:183 +0x2a9
+  runtime.call32()
+      /usr/local/go/src/runtime/asm_amd64.s:729 +0x48
+  reflect.Value.Call()
+      /usr/local/go/src/reflect/value.go:370 +0xc7
+  6.5840/labrpc.(*Service).dispatch()
+      /workspaces/6.5840/src/labrpc/labrpc.go:494 +0x47b
+  6.5840/labrpc.(*Server).dispatch()
+      /workspaces/6.5840/src/labrpc/labrpc.go:418 +0x26a
+  6.5840/labrpc.(*Network).processReq.func1()
+      /workspaces/6.5840/src/labrpc/labrpc.go:240 +0x9c
+
+Previous read at 0x00c00023a750 by goroutine 8748:
+  6.5840/raft.(*Raft).SendHeartbeat.func1()
+      /workspaces/6.5840/src/raft/raft.go:363 +0x89
+  6.5840/raft.(*Raft).SendHeartbeat.func2()
+      /workspaces/6.5840/src/raft/raft.go:375 +0x47
+
+Goroutine 7111 (running) created at:
+  6.5840/labrpc.(*Network).processReq()
+      /workspaces/6.5840/src/labrpc/labrpc.go:239 +0x2b1
+  6.5840/labrpc.MakeNetwork.func1.1()
+      /workspaces/6.5840/src/labrpc/labrpc.go:157 +0x9c
+
+Goroutine 8748 (running) created at:
+  6.5840/raft.(*Raft).SendHeartbeat()
+      /workspaces/6.5840/src/raft/raft.go:359 +0x15a
+  6.5840/raft.(*Raft).ticker()
+      /workspaces/6.5840/src/raft/raft.go:432 +0x2dc
+  6.5840/raft.Make.func1()
+      /workspaces/6.5840/src/raft/raft.go:490 +0x39
+==================
+--- FAIL: TestFailNoAgree2B (9.50s)
+    test_test.go:330: 1 committed but no majority
+    testing.go:1446: race detected during execution of test
 Test (2B): concurrent Start()s ...
-2023/07/28 06:58:45 Server 0 : Killed
-2023/07/28 06:58:46 Server 4 : Killed
-2023/07/28 06:58:46 Server 1 : Killed
-2023/07/28 06:58:46 Server 0 : Received majority vote, change to leader
-2023/07/28 06:58:46 Server 3 : Killed
-2023/07/28 06:58:46 Server 2 : Killed
-2023/07/28 06:58:46 Server 0 : Send Append Entries RPC , Command %!t(int=1)
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:58:46 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:46 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:58:46 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:46 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:58:46 Server 0 : Send Append Entries RPC , Command %!t(int=104)
 ==================
 WARNING: DATA RACE
-Read at 0x00c0001626b8 by goroutine 4596:
+Write at 0x00c0000be1a8 by goroutine 10124:
   6.5840/raft.(*Raft).AppendNewEntry.func1()
-      /workspaces/6.5840/src/raft/raft.go:294 +0x153
+      /workspaces/6.5840/src/raft/raft.go:290 +0x59c
   6.5840/raft.(*Raft).AppendNewEntry.func2()
-      /workspaces/6.5840/src/raft/raft.go:316 +0x18f
+      /workspaces/6.5840/src/raft/raft.go:300 +0x18f
 
-Previous write at 0x00c0001626b8 by goroutine 4576:
+Previous read at 0x00c0000be1a8 by goroutine 10142:
   6.5840/raft.(*Raft).AppendNewEntry.func1()
-      /workspaces/6.5840/src/raft/raft.go:306 +0x79e
+      /workspaces/6.5840/src/raft/raft.go:278 +0x125
   6.5840/raft.(*Raft).AppendNewEntry.func2()
-      /workspaces/6.5840/src/raft/raft.go:316 +0x18f
+      /workspaces/6.5840/src/raft/raft.go:300 +0x18f
 
-Goroutine 4596 (running) created at:
+Goroutine 10124 (running) created at:
   6.5840/raft.(*Raft).AppendNewEntry()
-      /workspaces/6.5840/src/raft/raft.go:292 +0x7be
+      /workspaces/6.5840/src/raft/raft.go:276 +0x7be
   6.5840/raft.(*Raft).Start()
-      /workspaces/6.5840/src/raft/raft.go:343 +0x1bb
-  6.5840/raft.TestConcurrentStarts2B.func1()
-      /workspaces/6.5840/src/raft/test_test.go:383 +0x144
-  6.5840/raft.TestConcurrentStarts2B.func4()
-      /workspaces/6.5840/src/raft/test_test.go:391 +0x47
-
-Goroutine 4576 (running) created at:
-  6.5840/raft.(*Raft).AppendNewEntry()
-      /workspaces/6.5840/src/raft/raft.go:292 +0x7be
-  6.5840/raft.(*Raft).Start()
-      /workspaces/6.5840/src/raft/raft.go:343 +0x1bb
+      /workspaces/6.5840/src/raft/raft.go:329 +0x144
   6.5840/raft.TestConcurrentStarts2B()
       /workspaces/6.5840/src/raft/test_test.go:370 +0x188
   testing.tRunner()
       /usr/local/go/src/testing/testing.go:1576 +0x216
   testing.(*T).Run.func1()
       /usr/local/go/src/testing/testing.go:1629 +0x47
-==================
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 1 1], Leader Next Index : [0 2 2]
-==================
-WARNING: DATA RACE
-Read at 0x00c0001626a0 by goroutine 4595:
-  reflect.typedmemmove()
-      /usr/local/go/src/runtime/mbarrier.go:178 +0x0
-  reflect.packEface()
-      /usr/local/go/src/reflect/value.go:125 +0xaf
-  reflect.valueInterface()
-      /usr/local/go/src/reflect/value.go:1510 +0x18b
-  reflect.Value.Interface()
-      /usr/local/go/src/reflect/value.go:1480 +0xc9
-  fmt.(*pp).printValue()
-      /usr/local/go/src/fmt/print.go:769 +0xca
-  fmt.(*pp).printValue()
-      /usr/local/go/src/fmt/print.go:912 +0x2365
-  fmt.(*pp).printArg()
-      /usr/local/go/src/fmt/print.go:759 +0xe44
-  fmt.(*pp).doPrintf()
-      /usr/local/go/src/fmt/print.go:1077 +0x599
-  fmt.Sprintf()
-      /usr/local/go/src/fmt/print.go:239 +0x67
-  log.Printf()
-      /usr/local/go/src/log/log.go:350 +0x8c
-  6.5840/raft.DPrintf2B()
-      /workspaces/6.5840/src/raft/util.go:23 +0x4e5
-  6.5840/raft.(*Raft).AppendNewEntry.func1()
-      /workspaces/6.5840/src/raft/raft.go:300 +0x3b8
-  6.5840/raft.(*Raft).AppendNewEntry.func2()
-      /workspaces/6.5840/src/raft/raft.go:316 +0x18f
 
-Previous write at 0x00c0001626a0 by goroutine 4576:
-  6.5840/raft.(*Raft).AppendNewEntry.func1()
-      /workspaces/6.5840/src/raft/raft.go:305 +0x732
-  6.5840/raft.(*Raft).AppendNewEntry.func2()
-      /workspaces/6.5840/src/raft/raft.go:316 +0x18f
-
-Goroutine 4595 (running) created at:
+Goroutine 10142 (running) created at:
   6.5840/raft.(*Raft).AppendNewEntry()
-      /workspaces/6.5840/src/raft/raft.go:292 +0x7be
+      /workspaces/6.5840/src/raft/raft.go:276 +0x7be
   6.5840/raft.(*Raft).Start()
-      /workspaces/6.5840/src/raft/raft.go:343 +0x1bb
-  6.5840/raft.TestConcurrentStarts2B.func1()
-      /workspaces/6.5840/src/raft/test_test.go:383 +0x144
-  6.5840/raft.TestConcurrentStarts2B.func4()
-      /workspaces/6.5840/src/raft/test_test.go:391 +0x47
-
-Goroutine 4576 (running) created at:
-  6.5840/raft.(*Raft).AppendNewEntry()
-      /workspaces/6.5840/src/raft/raft.go:292 +0x7be
-  6.5840/raft.(*Raft).Start()
-      /workspaces/6.5840/src/raft/raft.go:343 +0x1bb
-  6.5840/raft.TestConcurrentStarts2B()
-      /workspaces/6.5840/src/raft/test_test.go:370 +0x188
-  testing.tRunner()
-      /usr/local/go/src/testing/testing.go:1576 +0x216
-  testing.(*T).Run.func1()
-      /usr/local/go/src/testing/testing.go:1629 +0x47
-==================
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 1 1], Leader Next Index : [0 2 2]
-2023/07/28 06:58:46 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 2 : Committing log {1 1}
-2023/07/28 06:58:46 Server 2 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:58:46 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 1 : Committing log {1 1}
-2023/07/28 06:58:46 Server 1 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:58:46 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:58:46 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:58:46 Server 0 : Send Append Entries RPC , Command %!t(int=100)
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 2 2], Leader Next Index : [0 3 3]
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 2 2], Leader Next Index : [0 3 3]
-2023/07/28 06:58:46 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 2 : Committing log {1 1}
-2023/07/28 06:58:46 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 1 : Committing log {1 1}
-2023/07/28 06:58:46 Server 1 : Committing log {1 104}
-2023/07/28 06:58:46 Server 1 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:58:46 Server 2 : Committing log {1 104}
-2023/07/28 06:58:46 Server 2 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:58:46 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:58:46 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:58:46 Server 0 : Send Append Entries RPC , Command %!t(int=102)
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 3 3], Leader Next Index : [0 4 4]
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 3 3], Leader Next Index : [0 4 4]
-2023/07/28 06:58:46 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 1 : Committing log {1 1}
-2023/07/28 06:58:46 Server 1 : Committing log {1 104}
-2023/07/28 06:58:46 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 2 : Committing log {1 1}
-2023/07/28 06:58:46 Server 2 : Committing log {1 104}
-2023/07/28 06:58:46 Server 1 : Committing log {1 100}
-2023/07/28 06:58:46 Server 1 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:58:46 Server 2 : Committing log {1 100}
-2023/07/28 06:58:46 Server 2 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:58:46 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:58:46 Server 0 : Send Append Entries RPC , Command %!t(int=103)
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries2 , Leader Match Index : [0 4 3], Leader Next Index : [0 5 4]
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 4 3], Leader Next Index : [0 5 4]
-2023/07/28 06:58:46 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:58:46 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 2 : Committing log {1 1}
-2023/07/28 06:58:46 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 1 : Committing log {1 1}
-2023/07/28 06:58:46 Server 1 : Committing log {1 104}
-2023/07/28 06:58:46 Server 2 : Committing log {1 104}
-2023/07/28 06:58:46 Server 1 : Committing log {1 100}
-2023/07/28 06:58:46 Server 1 : Committing log {1 102}
-2023/07/28 06:58:46 Server 1 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:58:46 Server 2 : Committing log {1 100}
-2023/07/28 06:58:46 Server 2 : Committing log {1 102}
-2023/07/28 06:58:46 Server 2 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:58:46 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 5
-2023/07/28 06:58:46 Server 0 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 2 - Len of entries2 , Leader Match Index : [0 5 4], Leader Next Index : [0 6 5]
-2023/07/28 06:58:46 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 5
-==================
-WARNING: DATA RACE
-Read at 0x00c0001626b8 by goroutine 4635:
-  reflect.typedmemmove()
-      /usr/local/go/src/runtime/mbarrier.go:178 +0x0
-  reflect.packEface()
-      /usr/local/go/src/reflect/value.go:125 +0xaf
-  reflect.valueInterface()
-      /usr/local/go/src/reflect/value.go:1510 +0x18b
-  reflect.Value.Interface()
-      /usr/local/go/src/reflect/value.go:1480 +0xc9
-  fmt.(*pp).printValue()
-      /usr/local/go/src/fmt/print.go:769 +0xca
-  fmt.(*pp).printValue()
-      /usr/local/go/src/fmt/print.go:912 +0x2365
-  fmt.(*pp).printArg()
-      /usr/local/go/src/fmt/print.go:759 +0xe44
-  fmt.(*pp).doPrintf()
-      /usr/local/go/src/fmt/print.go:1077 +0x599
-  fmt.Sprintf()
-      /usr/local/go/src/fmt/print.go:239 +0x67
-  log.Printf()
-      /usr/local/go/src/log/log.go:350 +0x8c
-  6.5840/raft.DPrintf2B()
-      /workspaces/6.5840/src/raft/util.go:23 +0x4e5
-  6.5840/raft.(*Raft).AppendNewEntry.func1()
-      /workspaces/6.5840/src/raft/raft.go:300 +0x3b8
-  6.5840/raft.(*Raft).AppendNewEntry.func2()
-      /workspaces/6.5840/src/raft/raft.go:316 +0x18f
-
-Previous write at 0x00c0001626b8 by goroutine 4625:
-  6.5840/raft.(*Raft).AppendNewEntry.func1()
-      /workspaces/6.5840/src/raft/raft.go:306 +0x79e
-  6.5840/raft.(*Raft).AppendNewEntry.func2()
-      /workspaces/6.5840/src/raft/raft.go:316 +0x18f
-
-Goroutine 4635 (running) created at:
-  6.5840/raft.(*Raft).AppendNewEntry()
-      /workspaces/6.5840/src/raft/raft.go:292 +0x7be
-  6.5840/raft.(*Raft).Start()
-      /workspaces/6.5840/src/raft/raft.go:343 +0x1bb
-  6.5840/raft.TestConcurrentStarts2B.func1()
-      /workspaces/6.5840/src/raft/test_test.go:383 +0x144
-  6.5840/raft.TestConcurrentStarts2B.func4()
-      /workspaces/6.5840/src/raft/test_test.go:391 +0x47
-
-Goroutine 4625 (running) created at:
-  6.5840/raft.(*Raft).AppendNewEntry()
-      /workspaces/6.5840/src/raft/raft.go:292 +0x7be
-  6.5840/raft.(*Raft).Start()
-      /workspaces/6.5840/src/raft/raft.go:343 +0x1bb
+      /workspaces/6.5840/src/raft/raft.go:329 +0x144
   6.5840/raft.TestConcurrentStarts2B.func1()
       /workspaces/6.5840/src/raft/test_test.go:383 +0x144
   6.5840/raft.TestConcurrentStarts2B.func4()
       /workspaces/6.5840/src/raft/test_test.go:391 +0x47
 ==================
-2023/07/28 06:58:46 Server 0 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 5 5], Leader Next Index : [0 6 6]
-2023/07/28 06:58:46 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 2 : Committing log {1 1}
-2023/07/28 06:58:46 Server 2 : Committing log {1 104}
-2023/07/28 06:58:46 Server 2 : Committing log {1 100}
-2023/07/28 06:58:46 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:58:46 Server 1 : Committing log {1 1}
-2023/07/28 06:58:46 Server 1 : Committing log {1 104}
-2023/07/28 06:58:46 Server 1 : Committing log {1 100}
-2023/07/28 06:58:46 Server 1 : Committing log {1 102}
-2023/07/28 06:58:46 Server 1 : Committing log {1 103}
-2023/07/28 06:58:46 Server 1 : Reply AppendEntries RPC with success , current log size is 7
-2023/07/28 06:58:46 Server 2 : Committing log {1 102}
-2023/07/28 06:58:46 Server 2 : Committing log {1 103}
-2023/07/28 06:58:46 Server 0 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 6
-2023/07/28 06:58:46 Server 2 : Reply AppendEntries RPC with success , current log size is 7
-2023/07/28 06:58:46 Server 0 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 6
---- FAIL: TestConcurrentStarts2B (31.22s)
-    config.go:537: only 1 decided for index 6; wanted 3
+--- FAIL: TestConcurrentStarts2B (0.49s)
     testing.go:1446: race detected during execution of test
 Test (2B): rejoin of partitioned leader ...
-2023/07/28 06:59:17 Server 1 : Killed
-2023/07/28 06:59:17 Server 0 : Killed
-2023/07/28 06:59:17 Server 2 : Received majority vote, change to leader
-2023/07/28 06:59:17 Server 2 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:59:17 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:59:17 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:59:17 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:17 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:59:17 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:17 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:59:17 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:59:17 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:59:17 Server 2 : Killed
-2023/07/28 06:59:19 Server 2 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:59:19 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [1 1 0], Leader Next Index : [2 2 0]
-2023/07/28 06:59:19 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [1 1 0], Leader Next Index : [2 2 0]
-2023/07/28 06:59:19 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:19 Server 0 : Committing log {1 101}
-2023/07/28 06:59:19 Server 0 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:59:19 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:19 Server 1 : Committing log {1 101}
-2023/07/28 06:59:19 Server 1 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:59:19 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:59:19 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:59:21 Server 2 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:59:21 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [2 2 0], Leader Next Index : [3 3 0]
-2023/07/28 06:59:21 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [2 2 0], Leader Next Index : [3 3 0]
-2023/07/28 06:59:21 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:21 Server 1 : Committing log {1 101}
-2023/07/28 06:59:21 Server 1 : Committing log {1 101}
-2023/07/28 06:59:21 Server 1 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:59:21 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:21 Server 0 : Committing log {1 101}
-2023/07/28 06:59:21 Server 0 : Committing log {1 101}
-2023/07/28 06:59:21 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:59:21 Server 0 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:59:21 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:59:23 Server 2 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:59:23 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [3 3 0], Leader Next Index : [4 4 0]
-2023/07/28 06:59:23 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [3 3 0], Leader Next Index : [4 4 0]
-2023/07/28 06:59:23 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:23 Server 0 : Committing log {1 101}
-2023/07/28 06:59:23 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:23 Server 1 : Committing log {1 101}
-2023/07/28 06:59:23 Server 0 : Committing log {1 101}
-2023/07/28 06:59:23 Server 0 : Committing log {1 101}
-2023/07/28 06:59:23 Server 1 : Committing log {1 101}
-2023/07/28 06:59:23 Server 1 : Committing log {1 101}
-2023/07/28 06:59:23 Server 0 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:59:23 Server 1 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:59:23 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:59:23 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:59:25 Server 2 : Send Append Entries RPC , Command %!t(int=101)
-2023/07/28 06:59:25 Server 2 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [4 4 0], Leader Next Index : [5 5 0]
-2023/07/28 06:59:25 Server 2 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [4 4 0], Leader Next Index : [5 5 0]
-2023/07/28 06:59:25 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:25 Server 1 : Committing log {1 101}
-2023/07/28 06:59:25 Server 1 : Committing log {1 101}
-2023/07/28 06:59:25 Server 1 : Committing log {1 101}
-2023/07/28 06:59:25 Server 1 : Committing log {1 101}
-2023/07/28 06:59:25 Server 1 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:59:25 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:25 Server 0 : Committing log {1 101}
-2023/07/28 06:59:25 Server 0 : Committing log {1 101}
-2023/07/28 06:59:25 Server 0 : Committing log {1 101}
-2023/07/28 06:59:25 Server 0 : Committing log {1 101}
-2023/07/28 06:59:25 Server 0 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:59:25 Server 2 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 5
-2023/07/28 06:59:25 Server 2 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 5
---- FAIL: TestRejoin2B (10.15s)
-    config.go:601: one(101) failed to reach agreement
-Test (2B): leader backs up quickly over incorrect follower logs ...
-2023/07/28 06:59:27 Server 2 : Killed
-2023/07/28 06:59:27 Server 3 : Received majority vote, change to leader
-2023/07/28 06:59:27 Server 3 : Send Append Entries RPC , Command %!t(int=934146769659061403)
-2023/07/28 06:59:27 Server 3 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:59:27 Server 3 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:59:27 Server 3 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:59:27 Server 3 : Send AppendEntries RPC to Server 4 - Len of entries1 , Leader Match Index : [0 0 0 0 0], Leader Next Index : [0 0 0 0 0]
-2023/07/28 06:59:27 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:27 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:59:27 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:27 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:59:27 Server 3 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:59:27 Server 4 : Get AppendEntries RPC 
-2023/07/28 06:59:27 Server 4 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:59:27 Server 3 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:59:27 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:27 Server 1 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:59:27 Server 3 : Server 4 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:59:27 Server 3 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:59:27 Server 1 : Killed
-2023/07/28 06:59:27 Server 0 : Killed
-2023/07/28 06:59:29 Server 3 : Send Append Entries RPC , Command %!t(int=934146769659061403)
-2023/07/28 06:59:29 Server 3 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [1 1 1 0 1], Leader Next Index : [2 2 2 0 2]
-2023/07/28 06:59:29 Server 3 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [1 1 1 0 1], Leader Next Index : [2 2 2 0 2]
-2023/07/28 06:59:29 Server 3 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [1 1 1 0 1], Leader Next Index : [2 2 2 0 2]
-2023/07/28 06:59:29 Server 3 : Send AppendEntries RPC to Server 4 - Len of entries1 , Leader Match Index : [1 1 1 0 1], Leader Next Index : [2 2 2 0 2]
-2023/07/28 06:59:29 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:29 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:29 Server 2 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:59:29 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:29 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:29 Server 0 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:59:29 Server 4 : Get AppendEntries RPC 
-2023/07/28 06:59:29 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:29 Server 4 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:59:29 Server 3 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:59:29 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:29 Server 3 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:59:29 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:29 Server 1 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:59:29 Server 3 : Server 4 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:59:29 Server 3 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:59:31 Server 3 : Send Append Entries RPC , Command %!t(int=934146769659061403)
-2023/07/28 06:59:31 Server 3 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [2 2 2 0 2], Leader Next Index : [3 3 3 0 3]
-2023/07/28 06:59:31 Server 3 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [2 2 2 0 2], Leader Next Index : [3 3 3 0 3]
-2023/07/28 06:59:31 Server 3 : Send AppendEntries RPC to Server 4 - Len of entries1 , Leader Match Index : [2 2 2 0 2], Leader Next Index : [3 3 3 0 3]
-2023/07/28 06:59:31 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:31 Server 4 : Get AppendEntries RPC 
-2023/07/28 06:59:31 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:31 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:31 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:31 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:31 Server 1 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:59:31 Server 4 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:59:31 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:31 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:31 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:31 Server 3 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:59:31 Server 0 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:59:31 Server 3 : Server 4 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:59:31 Server 3 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:59:31 Server 3 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [3 3 2 0 3], Leader Next Index : [4 4 3 0 4]
-2023/07/28 06:59:31 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:31 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:31 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:31 Server 2 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:59:31 Server 3 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:59:33 Server 3 : Send Append Entries RPC , Command %!t(int=934146769659061403)
-2023/07/28 06:59:33 Server 3 : Send AppendEntries RPC to Server 4 - Len of entries1 , Leader Match Index : [3 3 3 0 3], Leader Next Index : [4 4 4 0 4]
-2023/07/28 06:59:33 Server 3 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [3 3 3 0 3], Leader Next Index : [4 4 4 0 4]
-2023/07/28 06:59:33 Server 3 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [3 3 3 0 3], Leader Next Index : [4 4 4 0 4]
-2023/07/28 06:59:33 Server 3 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [3 3 3 0 3], Leader Next Index : [4 4 4 0 4]
-2023/07/28 06:59:33 Server 4 : Get AppendEntries RPC 
-2023/07/28 06:59:33 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:33 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:33 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 1 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:59:33 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 4 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:59:33 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:33 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 3 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:59:33 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:33 Server 0 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:59:33 Server 2 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:59:33 Server 3 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:59:33 Server 3 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:59:33 Server 3 : Server 4 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:59:35 Server 3 : Send Append Entries RPC , Command %!t(int=934146769659061403)
-2023/07/28 06:59:35 Server 3 : Send AppendEntries RPC to Server 1 - Len of entries1 , Leader Match Index : [4 4 4 0 4], Leader Next Index : [5 5 5 0 5]
-2023/07/28 06:59:35 Server 3 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [4 4 4 0 4], Leader Next Index : [5 5 5 0 5]
-2023/07/28 06:59:35 Server 3 : Send AppendEntries RPC to Server 4 - Len of entries1 , Leader Match Index : [4 4 4 0 4], Leader Next Index : [5 5 5 0 5]
-2023/07/28 06:59:35 Server 3 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [4 4 4 0 4], Leader Next Index : [5 5 5 0 5]
-2023/07/28 06:59:35 Server 1 : Get AppendEntries RPC 
-2023/07/28 06:59:35 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 1 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 1 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:59:35 Server 4 : Get AppendEntries RPC 
-2023/07/28 06:59:35 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:35 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:35 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 2 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 4 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 2 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:59:35 Server 3 : Server 1 replied {Term:1 Success:true} , lastAppliedIndex 5
-2023/07/28 06:59:35 Server 4 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:59:35 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 0 : Committing log {1 934146769659061403}
-2023/07/28 06:59:35 Server 0 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:59:35 Server 3 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 5
-2023/07/28 06:59:35 Server 3 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 5
-2023/07/28 06:59:35 Server 3 : Server 4 replied {Term:1 Success:true} , lastAppliedIndex 5
---- FAIL: TestBackup2B (10.15s)
-    config.go:601: one(934146769659061403) failed to reach agreement
-Test (2B): RPC counts aren't too high ...
-2023/07/28 06:59:37 Server 3 : Killed
-2023/07/28 06:59:37 Server 1 : Killed
-2023/07/28 06:59:37 Server 4 : Killed
-2023/07/28 06:59:37 Server 2 : Killed
-2023/07/28 06:59:37 Server 0 : Killed
-2023/07/28 06:59:37 Server 1 : Received majority vote, change to leader
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=1)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [0 0 0], Leader Next Index : [0 0 0]
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 2
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 1
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=135330108)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [1 0 1], Leader Next Index : [2 0 2]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [1 0 1], Leader Next Index : [2 0 2]
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 3
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=1079942597)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [2 0 1], Leader Next Index : [3 0 2]
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 2
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [2 0 2], Leader Next Index : [3 0 3]
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 4
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=1944039829)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [3 0 2], Leader Next Index : [4 0 3]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries2 , Leader Match Index : [3 0 2], Leader Next Index : [4 0 3]
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 3
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 5
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=1430593254)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries2 , Leader Match Index : [4 0 3], Leader Next Index : [5 0 4]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [4 0 3], Leader Next Index : [5 0 4]
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 4
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 6
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 5
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=279734515)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [4 0 5], Leader Next Index : [5 0 6]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries2 , Leader Match Index : [4 0 5], Leader Next Index : [5 0 6]
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 5
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 7
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 7
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 6
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 6
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=1276474243)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [6 0 6], Leader Next Index : [7 0 7]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [6 0 6], Leader Next Index : [7 0 7]
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 0 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 8
-2023/07/28 06:59:38 Server 2 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 2 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 8
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 7
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=1908378224)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries2 , Leader Match Index : [7 0 6], Leader Next Index : [8 0 7]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [7 0 6], Leader Next Index : [8 0 7]
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 7
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 9
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 2 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 8
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=269062352)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [8 0 7], Leader Next Index : [9 0 8]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries2 , Leader Match Index : [8 0 7], Leader Next Index : [9 0 8]
-2023/07/28 06:59:38 Server 2 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 9
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 0 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 8
-2023/07/28 06:59:38 Server 0 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 2 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1908378224}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 10
-2023/07/28 06:59:38 Server 2 : Committing log {1 1908378224}
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 10
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 9
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=468642243)
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 9
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries2 , Leader Match Index : [9 0 8], Leader Next Index : [10 0 10]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [9 0 8], Leader Next Index : [10 0 9]
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 0 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1908378224}
-2023/07/28 06:59:38 Server 2 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 0 : Committing log {1 269062352}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 11
-2023/07/28 06:59:38 Server 2 : Committing log {1 1908378224}
-2023/07/28 06:59:38 Server 2 : Committing log {1 269062352}
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 10
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=824623268)
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 11
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 10
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [10 0 10], Leader Next Index : [11 0 11]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries1 , Leader Match Index : [10 0 10], Leader Next Index : [11 0 11]
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 0 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1908378224}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 269062352}
-2023/07/28 06:59:38 Server 0 : Committing log {1 468642243}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 12
-2023/07/28 06:59:38 Server 2 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 2 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1908378224}
-2023/07/28 06:59:38 Server 2 : Committing log {1 269062352}
-2023/07/28 06:59:38 Server 2 : Committing log {1 468642243}
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 12
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 11
-2023/07/28 06:59:38 Server 1 : Send Append Entries RPC , Command %!t(int=1670812330)
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 2 - Len of entries2 , Leader Match Index : [11 0 10], Leader Next Index : [12 0 11]
-2023/07/28 06:59:38 Server 1 : Send AppendEntries RPC to Server 0 - Len of entries1 , Leader Match Index : [11 0 10], Leader Next Index : [12 0 11]
-2023/07/28 06:59:38 Server 2 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 2 : Committing log {1 1}
-2023/07/28 06:59:38 Server 2 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 2 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 2 : Committing log {1 1908378224}
-2023/07/28 06:59:38 Server 2 : Committing log {1 269062352}
-2023/07/28 06:59:38 Server 2 : Committing log {1 468642243}
-2023/07/28 06:59:38 Server 2 : Committing log {1 824623268}
-2023/07/28 06:59:38 Server 2 : Reply AppendEntries RPC with success , current log size is 13
-2023/07/28 06:59:38 Server 0 : Get AppendEntries RPC 
-2023/07/28 06:59:38 Server 0 : Committing log {1 1}
-2023/07/28 06:59:38 Server 0 : Committing log {1 135330108}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1079942597}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1944039829}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1430593254}
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 12
-2023/07/28 06:59:38 Server 0 : Committing log {1 279734515}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1276474243}
-2023/07/28 06:59:38 Server 0 : Committing log {1 1908378224}
-2023/07/28 06:59:38 Server 0 : Committing log {1 269062352}
-2023/07/28 06:59:38 Server 0 : Committing log {1 468642243}
-2023/07/28 06:59:38 Server 0 : Committing log {1 824623268}
-2023/07/28 06:59:38 Server 1 : Server 2 replied {Term:1 Success:true} , lastAppliedIndex 11
-2023/07/28 06:59:38 Server 0 : Reply AppendEntries RPC with success , current log size is 13
-2023/07/28 06:59:38 Server 1 : Server 0 replied {Term:1 Success:true} , lastAppliedIndex 12
---- FAIL: TestCount2B (2.06s)
-    test_test.go:669: too many RPCs (66) for 1 second of idleness
-FAIL
+==================
+WARNING: DATA RACE
+Read at 0x00c0000de240 by goroutine 13409:
+  6.5840/raft.(*Raft).SendHeartbeat.func1()
+      /workspaces/6.5840/src/raft/raft.go:366 +0xf0
+  6.5840/raft.(*Raft).SendHeartbeat.func2()
+      /workspaces/6.5840/src/raft/raft.go:375 +0x47
+
+Previous write at 0x00c0000de240 by goroutine 10196:
+  6.5840/raft.(*Raft).AppendNewEntry()
+      /workspaces/6.5840/src/raft/raft.go:270 +0x2db
+  6.5840/raft.(*Raft).Start()
+      /workspaces/6.5840/src/raft/raft.go:329 +0x144
+  6.5840/raft.TestRejoin2B()
+      /workspaces/6.5840/src/raft/test_test.go:471 +0x233
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1576 +0x216
+  testing.(*T).Run.func1()
+      /usr/local/go/src/testing/testing.go:1629 +0x47
+
+Goroutine 13409 (running) created at:
+  6.5840/raft.(*Raft).SendHeartbeat()
+      /workspaces/6.5840/src/raft/raft.go:359 +0x15a
+  6.5840/raft.(*Raft).ticker()
+      /workspaces/6.5840/src/raft/raft.go:432 +0x2dc
+  6.5840/raft.Make.func1()
+      /workspaces/6.5840/src/raft/raft.go:490 +0x39
+
+Goroutine 10196 (running) created at:
+  testing.(*T).Run()
+      /usr/local/go/src/testing/testing.go:1629 +0x805
+  testing.runTests.func1()
+      /usr/local/go/src/testing/testing.go:2036 +0x8d
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1576 +0x216
+  testing.runTests()
+      /usr/local/go/src/testing/testing.go:2034 +0x87c
+  testing.(*M).Run()
+      /usr/local/go/src/testing/testing.go:1906 +0xb44
+  main.main()
+      _testmain.go:101 +0x2e9
+==================
+==================
+WARNING: DATA RACE
+Read at 0x00c0000004e0 by goroutine 13409:
+  6.5840/raft.(*Raft).SendHeartbeat.func1()
+      /workspaces/6.5840/src/raft/raft.go:366 +0x148
+  6.5840/raft.(*Raft).SendHeartbeat.func2()
+      /workspaces/6.5840/src/raft/raft.go:375 +0x47
+
+Previous write at 0x00c0000004e0 by goroutine 10196:
+  6.5840/raft.(*Raft).AppendNewEntry()
+      /workspaces/6.5840/src/raft/raft.go:270 +0x27d
+  6.5840/raft.(*Raft).Start()
+      /workspaces/6.5840/src/raft/raft.go:329 +0x144
+  6.5840/raft.TestRejoin2B()
+      /workspaces/6.5840/src/raft/test_test.go:471 +0x233
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1576 +0x216
+  testing.(*T).Run.func1()
+      /usr/local/go/src/testing/testing.go:1629 +0x47
+
+Goroutine 13409 (running) created at:
+  6.5840/raft.(*Raft).SendHeartbeat()
+      /workspaces/6.5840/src/raft/raft.go:359 +0x15a
+  6.5840/raft.(*Raft).ticker()
+      /workspaces/6.5840/src/raft/raft.go:432 +0x2dc
+  6.5840/raft.Make.func1()
+      /workspaces/6.5840/src/raft/raft.go:490 +0x39
+
+Goroutine 10196 (running) created at:
+  testing.(*T).Run()
+      /usr/local/go/src/testing/testing.go:1629 +0x805
+  testing.runTests.func1()
+      /usr/local/go/src/testing/testing.go:2036 +0x8d
+  testing.tRunner()
+      /usr/local/go/src/testing/testing.go:1576 +0x216
+  testing.runTests()
+      /usr/local/go/src/testing/testing.go:2034 +0x87c
+  testing.(*M).Run()
+      /usr/local/go/src/testing/testing.go:1906 +0xb44
+  main.main()
+      _testmain.go:101 +0x2e9
+==================
+2023/07/28 07:45:15 apply error: server 0 apply out of order 5
 exit status 1
-FAIL	6.5840/raft	66.502s
+FAIL	6.5840/raft	49.392s
