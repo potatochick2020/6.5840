@@ -23,7 +23,7 @@ func max(a, b int) int {
 }
 
 func min(a, b int) int {
-	if a > b {
+	if a < b {
 		return a
 	}
 	return b
@@ -206,45 +206,50 @@ type AppendEntriesReply struct {
 
 // AppendEntries RPC handler
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
+
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 	rf.electionTimeOut.Reset(RamdomizedElection())
-	rf.role = FOLLOWER
-	// Continue if this is not a heart beat message
 	if len(args.Entries) > 0 {
-		//1. Reply false if term < currentTerm (§5.1)
-		// if args.Term < rf.currentTerm {
-		// 	reply.Term = rf.currentTerm
-		// 	reply.Success = false
-		// 	return
-		// }
-		//2. Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)
-		// if args.Term == rf.currentTerm && rf.lastApplied < args.PrevLogIndex {
-		// 	reply.Term = rf.currentTerm
-		// 	reply.Success = false
-		// 	return
-		// }
-		//3. If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)
-		//4. Append any new entries not already in the log
-		//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
-
-		//return success and commit to LOG
-
-		DPrintf2B("Server %d : Get AppendEntries RPC ", rf.me)
-		i := len(args.Entries) - (args.PrevLogIndex - rf.lastApplied + 1)
-		//DPrintf2B("Server %d : i  %d \n", rf.me, i)
-		for ; i < len(args.Entries); i++ {
-			rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[i]})
-			rf.lastApplied++
-			rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[rf.lastApplied].Command, CommandIndex: rf.lastApplied}
-			rf.commitIndex++
-		}
-
-		DPrintf2B("Server %d : Reply AppendEntries RPC with success , current log size is %+v", rf.me, len(rf.logs))
-
-		reply.Term, reply.Success = rf.currentTerm, true
+		DPrintf2B("Server %d : Get AppendEntries RPC - args = %+v ", rf.me, args)
+	}
+	//1. Reply false if term < currentTerm (§5.1)
+	if args.Term < rf.currentTerm {
+		reply.Term = rf.currentTerm
+		reply.Success = false
 		return
 	}
+	//2. Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)
+	if args.PrevLogTerm != rf.logs[args.PrevLogIndex].Term {
+		reply.Term = rf.currentTerm
+		reply.Success = false
+		return
+	}
+	//TODO:
+	//3. If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)
+	//4. Append any new entries not already in the log
+	//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
+
+	rf.role = FOLLOWER
+	//Commit uncommitted log following leaders commit index
+	for i := rf.commitIndex + 1; i <= min(rf.lastApplied, args.LeaderCommit); i++ {
+		DPrintf2B("Server %d : As Follower, Committing log entry[%d] %+v\n", rf.me, i, rf.logs[i])
+		rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[i].Command, CommandIndex: i}
+		rf.commitIndex++
+	}
+
+	//Add to log
+	if len(args.Entries) > 0 {
+		DPrintf2B("Server %d : Entries = %+v,  len(args.Entries) - (args.PrevLogIndex - rf.lastApplied + 1) %d", rf.me, args.Entries, len(args.Entries)-(args.PrevLogIndex-rf.lastApplied+1))
+		for i := rf.lastApplied - args.PrevLogIndex; i < len(args.Entries); i++ {
+			rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[i]})
+			rf.lastApplied++
+		}
+	}
+	if len(args.Entries) > 0 {
+		DPrintf2B("Server %d : Reply AppendEntries RPC with success , current log size is %+v", rf.me, len(rf.logs))
+	}
+	reply.Term, reply.Success = rf.currentTerm, true
 }
 
 // the service using Raft (e.g. a k/v server) wants to start
@@ -260,29 +265,30 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 // term. the third return value is true if this server believes it is
 // the leader.
 func (rf *Raft) AppendNewEntry(command interface{}) {
-	args := AppendEntriesArgs{
-		Term:         rf.currentTerm,
-		LeaderId:     rf.me,
-		PrevLogIndex: rf.lastApplied,
-		PrevLogTerm:  rf.logs[rf.lastApplied].Term,
-		LeaderCommit: rf.commitIndex,
-	}
+
 	rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: command})
 	rf.lastApplied = rf.lastApplied + 1
 	//Committed := false
 	c := make(chan int)
 	for i := 0; i < len(rf.peers); i++ {
 		if i != rf.me {
-			go func(counter int, self int, appendArgs AppendEntriesArgs, matchIndex []int, nextIndex []int, lastAppliedindex int) {
-				//add all missing entries to append args
-				appendArgs.Entries = make([]interface{}, lastAppliedindex-matchIndex[counter])
-				for j := 0; j < len(appendArgs.Entries); j++ {
-					appendArgs.Entries[j] = rf.logs[matchIndex[counter]+j+1].Command
+			go func(counter int, self int, matchIndex []int, nextIndex []int, lastAppliedindex int) {
+				//AppendEntriesArgs
+				args := AppendEntriesArgs{
+					Term:         rf.currentTerm,
+					LeaderId:     rf.me,
+					PrevLogIndex: matchIndex[counter],
+					PrevLogTerm:  rf.logs[matchIndex[counter]].Term,
+					LeaderCommit: rf.commitIndex,
+				}
+				args.Entries = make([]interface{}, lastAppliedindex-matchIndex[counter])
+				for j := 0; j < len(args.Entries); j++ {
+					args.Entries[j] = rf.logs[matchIndex[counter]+j+1].Command
 				}
 
 				reply := AppendEntriesReply{}
-				DPrintf2B("Server %d : Send AppendEntries RPC to Server %d - Len of entries%+v , Leader Match Index : %+v, Leader Next Index : %+v", self, counter, len(appendArgs.Entries), matchIndex, nextIndex)
-				if rf.peers[counter].Call("Raft.AppendEntries", &appendArgs, &reply) {
+				DPrintf2B("Server %d : Send AppendEntries RPC to Server %d - Len of entries%+v , Leader Match Index : %+v, Leader Next Index : %+v", self, counter, len(args.Entries), matchIndex, nextIndex)
+				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
 					DPrintf2B("Server %d : Server %d replied %+v , lastAppliedIndex %d", self, counter, reply, lastAppliedindex)
 					if reply.Success {
 						rf.peersMu[counter].Lock()
@@ -297,7 +303,7 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 					DPrintf2B("Server %d : Server %d DID NOT replied", self, counter)
 					c <- 2
 				}
-			}(i, rf.me, args, rf.matchIndex, rf.nextIndex, rf.lastApplied)
+			}(i, rf.me, rf.matchIndex, rf.nextIndex, rf.lastApplied)
 		}
 	}
 	AppendEntriesSuccessCount := 1
@@ -310,9 +316,11 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 			AppenEntriesFailCount++
 		}
 		if AppendEntriesSuccessCount > len(rf.peers)/2 {
-			applyMessage := ApplyMsg{CommandValid: true, Command: command, CommandIndex: rf.lastApplied}
-			rf.applyChannel <- applyMessage
-			rf.commitIndex++
+			DPrintf2B("Server %d : Send Apply message, Command %+v, CommandIndex %d ", rf.me, command, rf.lastApplied)
+			for i := rf.commitIndex + 1; i <= rf.lastApplied; i++ {
+				rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[i].Command, CommandIndex: i}
+				rf.commitIndex++
+			}
 			break
 		}
 		if AppenEntriesFailCount > len(rf.peers)/2 {
@@ -320,6 +328,7 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 		}
 	}
 }
+
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	// Your code here (2B).
 	rf.mu.Lock()
@@ -356,14 +365,14 @@ func (rf *Raft) SendHeartbeat() {
 	//send append entries
 	for i := 0; i < len(rf.peers); i++ {
 		if i != rf.me {
-			go func(counter int) {
-				//TODO: Add prev log index and prev log term
-				//TODO: this will affect appendentries RPC handler
+			go func(counter int, matchIndex []int) {
+				//TOTEST: Add prev log index and prev log term
+				//TOTEST: this will affect appendentries RPC handler
 				args := AppendEntriesArgs{
 					Term:         rf.currentTerm,
 					LeaderId:     rf.me,
-					PrevLogIndex: rf.lastApplied,
-					PrevLogTerm:  rf.logs[rf.lastApplied].Term,
+					PrevLogIndex: matchIndex[counter],
+					PrevLogTerm:  rf.logs[matchIndex[counter]].Term,
 					LeaderCommit: rf.commitIndex,
 				}
 				reply := AppendEntriesReply{}
@@ -372,7 +381,7 @@ func (rf *Raft) SendHeartbeat() {
 				} else {
 					DPrintf2A("Server %d : Server %d did not received heartbeat", rf.me, counter)
 				}
-			}(i)
+			}(i, rf.matchIndex)
 		}
 	}
 }
