@@ -3,7 +3,7 @@ package raft
 import "log"
 
 // Debugging
-const Debug2A = false
+const Debug2A = true
 const Debug2B = true
 const Debug2C = false
 const Debug2D = false

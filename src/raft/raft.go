@@ -85,11 +85,11 @@ type Raft struct {
 }
 
 func StandardHeartBeat() time.Duration {
-	return 30 * time.Millisecond
+	return 50 * time.Millisecond
 }
 
-func RamdomizedElection() time.Duration {
-	return time.Duration(50+(rand.Int63()%300)) * time.Millisecond
+func RandomizedElection() time.Duration {
+	return time.Duration(360+(rand.Int63()%240)) * time.Millisecond
 }
 
 // return currentTerm and whether this server
@@ -176,12 +176,12 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
-	if args.Term > rf.currentTerm || (args.Term == rf.currentTerm && !rf.voted) {
+	if (args.Term > rf.currentTerm || (args.Term == rf.currentTerm && !rf.voted)) && (args.LastLogTerm >= rf.logs[rf.lastApplied].Term && args.LastLogIndex >= rf.lastApplied) {
 		//TODO: 2B add criteria that does not vote to leader
 		//TODO: add if candidate’s log is at least as up-to-date as receiver’s log, grant vote
 		reply.VoteGranted, reply.Term = true, rf.currentTerm
 		rf.voted, rf.votedFor, rf.currentTerm = true, args.CandidateId, args.Term
-		rf.electionTimeOut.Reset(RamdomizedElection())
+		rf.electionTimeOut.Reset(RandomizedElection())
 		DPrintf2A("Server %d : Voted to Server %d\n", rf.me, args.CandidateId)
 	} else {
 		reply.VoteGranted, reply.Term = false, rf.currentTerm
@@ -191,12 +191,12 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 }
 
 type AppendEntriesArgs struct {
-	Term         int           //leader's term
-	LeaderId     int           //so follower can redirect clients
-	PrevLogIndex int           //index of log entry immediately preceding new ones
-	PrevLogTerm  int           //term of prevLogIndex entry
-	Entries      []interface{} // log entries to store (empty for heartbeat; may send more than one for efficiency)
-	LeaderCommit int           //leader’s commitIndex
+	Term         int   //leader's term
+	LeaderId     int   //so follower can redirect clients
+	PrevLogIndex int   //index of log entry immediately preceding new ones
+	PrevLogTerm  int   //term of prevLogIndex entry
+	Entries      []Log // log entries to store (empty for heartbeat; may send more than one for efficiency)
+	LeaderCommit int   //leader’s commitIndex
 }
 
 type AppendEntriesReply struct {
@@ -206,48 +206,56 @@ type AppendEntriesReply struct {
 
 // AppendEntries RPC handler
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
-
+	if len(args.Entries) > 0 {
+		DPrintf2B("Server %d : Get AppendEntries RPC - args = %+v , rf.logs = %+v , rf.currentTerm = %d", rf.me, args, rf.logs, rf.currentTerm)
+	} else {
+		DPrintf2B("Server %d : Get Heart Beat - AppendEntries RPC - args = %+v , rf.logs = %+v , rf.currentTerm = %d", rf.me, args, rf.logs, rf.currentTerm)
+	}
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	rf.electionTimeOut.Reset(RamdomizedElection())
-	if len(args.Entries) > 0 {
-		DPrintf2B("Server %d : Get AppendEntries RPC - args = %+v ", rf.me, args)
-	}
+	DPrintf2B("Server %d : Enter Lock in appendEntriesRPC", rf.me)
+
 	//1. Reply false if term < currentTerm (§5.1)
-	if args.Term < rf.currentTerm {
-		reply.Term = rf.currentTerm
-		reply.Success = false
-		return
-	}
 	//2. Reply false if log doesn’t contain an entry at prevLogIndex whose term matches prevLogTerm (§5.3)
-	if args.PrevLogTerm != rf.logs[args.PrevLogIndex].Term {
+	if args.Term < rf.currentTerm || args.PrevLogTerm != rf.logs[args.PrevLogIndex].Term {
 		reply.Term = rf.currentTerm
 		reply.Success = false
 		return
 	}
 	//TODO:
-	//3. If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)
-	//4. Append any new entries not already in the log
-	//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry
-
 	rf.role = FOLLOWER
-	//Commit uncommitted log following leaders commit index
+	rf.electionTimeOut.Reset(RandomizedElection())
+	//3. If an existing entry conflicts with a new one (same index but different terms), delete the existing entry and all that follow it (§5.3)
+	if len(args.Entries) > 0 {
+		DPrintf2B("Server %d : Before delete - args.PrevLogIndex is %d , rf.lastApplied is %d ,current log is %+v", rf.me, args.PrevLogIndex, rf.lastApplied, rf.logs)
+		j := 0
+		for i := args.PrevLogIndex + 1; i <= rf.lastApplied && j <= rf.lastApplied; i++ {
+			if rf.logs[i].Term != args.Entries[j].Term {
+				rf.lastApplied = i - 1
+				for ; i <= rf.lastApplied; i++ {
+					rf.logs[i] = Log{}
+				}
+				break
+			}
+			j++
+		}
+		DPrintf2B("Server %d : Before append - current log is %+v", rf.me, rf.logs)
+		//4. Append any new entries not already in the lo
+		for i := rf.lastApplied - args.PrevLogIndex; i < len(args.Entries); i++ {
+			rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[i].Command})
+			rf.lastApplied++
+		}
+		DPrintf2B("Server %d : After append - current log is %+v", rf.me, rf.logs)
+	}
+	//5. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
 	for i := rf.commitIndex + 1; i <= min(rf.lastApplied, args.LeaderCommit); i++ {
 		DPrintf2B("Server %d : As Follower, Committing log entry[%d] %+v\n", rf.me, i, rf.logs[i])
 		rf.applyChannel <- ApplyMsg{CommandValid: true, Command: rf.logs[i].Command, CommandIndex: i}
 		rf.commitIndex++
 	}
 
-	//Add to log
 	if len(args.Entries) > 0 {
-		DPrintf2B("Server %d : Entries = %+v,  len(args.Entries) - (args.PrevLogIndex - rf.lastApplied + 1) %d", rf.me, args.Entries, len(args.Entries)-(args.PrevLogIndex-rf.lastApplied+1))
-		for i := rf.lastApplied - args.PrevLogIndex; i < len(args.Entries); i++ {
-			rf.logs = append(rf.logs, Log{Term: rf.currentTerm, Command: args.Entries[i]})
-			rf.lastApplied++
-		}
-	}
-	if len(args.Entries) > 0 {
-		DPrintf2B("Server %d : Reply AppendEntries RPC with success , current log size is %+v", rf.me, len(rf.logs))
+		DPrintf2B("Server %d : Reply AppendEntries RPC with success , current log is %+v", rf.me, rf.logs)
 	}
 	reply.Term, reply.Success = rf.currentTerm, true
 }
@@ -272,38 +280,38 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 	c := make(chan int)
 	for i := 0; i < len(rf.peers); i++ {
 		if i != rf.me {
-			go func(counter int, self int, matchIndex []int, nextIndex []int, lastAppliedindex int) {
+			go func(counter int, logs []Log, currentTerm int, me int, prevLogIndex int, prevLogTerm int, commitIndex int, lastAppliedIndex int) {
 				//AppendEntriesArgs
 				args := AppendEntriesArgs{
-					Term:         rf.currentTerm,
-					LeaderId:     rf.me,
-					PrevLogIndex: matchIndex[counter],
-					PrevLogTerm:  rf.logs[matchIndex[counter]].Term,
-					LeaderCommit: rf.commitIndex,
+					Term:         currentTerm,
+					LeaderId:     me,
+					PrevLogIndex: prevLogIndex,
+					PrevLogTerm:  prevLogTerm,
+					LeaderCommit: commitIndex,
 				}
-				args.Entries = make([]interface{}, lastAppliedindex-matchIndex[counter])
+				args.Entries = make([]Log, lastAppliedIndex-prevLogIndex)
 				for j := 0; j < len(args.Entries); j++ {
-					args.Entries[j] = rf.logs[matchIndex[counter]+j+1].Command
+					args.Entries[j] = logs[prevLogIndex+j+1]
 				}
 
 				reply := AppendEntriesReply{}
-				DPrintf2B("Server %d : Send AppendEntries RPC to Server %d - Len of entries%+v , Leader Match Index : %+v, Leader Next Index : %+v", self, counter, len(args.Entries), matchIndex, nextIndex)
+				DPrintf2B("Server %d : Send AppendEntries RPC to Server %d - entries%+v ", me, counter, args.Entries)
 				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
-					DPrintf2B("Server %d : Server %d replied %+v , lastAppliedIndex %d", self, counter, reply, lastAppliedindex)
+					DPrintf2B("Server %d : Server %d replied %+v , lastAppliedIndex %d", me, counter, reply, lastAppliedIndex)
 					if reply.Success {
 						rf.peersMu[counter].Lock()
-						rf.nextIndex[counter] = lastAppliedindex + 1
-						rf.matchIndex[counter] = lastAppliedindex
+						rf.nextIndex[counter] = lastAppliedIndex + 1
+						rf.matchIndex[counter] = lastAppliedIndex
 						rf.peersMu[counter].Unlock()
 						c <- 1
 					} else {
 						c <- 2
 					}
 				} else {
-					DPrintf2B("Server %d : Server %d DID NOT replied", self, counter)
+					DPrintf2B("Server %d : Server %d DID NOT replied", me, counter)
 					c <- 2
 				}
-			}(i, rf.me, rf.matchIndex, rf.nextIndex, rf.lastApplied)
+			}(i, rf.logs, rf.currentTerm, rf.me, rf.matchIndex[i], rf.logs[rf.matchIndex[i]].Term, rf.commitIndex, rf.lastApplied)
 		}
 	}
 	AppendEntriesSuccessCount := 1
@@ -324,6 +332,7 @@ func (rf *Raft) AppendNewEntry(command interface{}) {
 			break
 		}
 		if AppenEntriesFailCount > len(rf.peers)/2 {
+			DPrintf2B("Server %d : Send Apply message, Command %+v, CommandIndex %d ", rf.me, command, rf.lastApplied)
 			break
 		}
 	}
@@ -339,7 +348,6 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 		return rf.lastApplied, rf.currentTerm, true
 	}
 	return -1, -1, false
-
 }
 
 // the tester doesn't halt goroutines created by Raft after each test,
@@ -363,17 +371,18 @@ func (rf *Raft) killed() bool {
 
 func (rf *Raft) SendHeartbeat() {
 	//send append entries
+	DPrintfAll("Server %d : Send Heartbeat", rf.me)
 	for i := 0; i < len(rf.peers); i++ {
 		if i != rf.me {
-			go func(counter int, matchIndex []int) {
+			go func(counter int, term int, leaderId int, matchIndex []int, prevLogTerm int, commitIndex int) {
 				//TOTEST: Add prev log index and prev log term
 				//TOTEST: this will affect appendentries RPC handler
 				args := AppendEntriesArgs{
-					Term:         rf.currentTerm,
-					LeaderId:     rf.me,
+					Term:         term,
+					LeaderId:     leaderId,
 					PrevLogIndex: matchIndex[counter],
-					PrevLogTerm:  rf.logs[matchIndex[counter]].Term,
-					LeaderCommit: rf.commitIndex,
+					PrevLogTerm:  prevLogTerm,
+					LeaderCommit: commitIndex,
 				}
 				reply := AppendEntriesReply{}
 				if rf.peers[counter].Call("Raft.AppendEntries", &args, &reply) {
@@ -381,22 +390,18 @@ func (rf *Raft) SendHeartbeat() {
 				} else {
 					DPrintf2A("Server %d : Server %d did not received heartbeat", rf.me, counter)
 				}
-			}(i, rf.matchIndex)
+			}(i, rf.currentTerm, rf.me, rf.matchIndex, rf.logs[rf.matchIndex[i]].Term, rf.commitIndex)
 		}
 	}
 }
 
 func (rf *Raft) StartElection() {
-	DPrintf2A("Server %d : Start Election", rf.me)
+	DPrintfAll("Server %d : Start Election", rf.me)
 	//request vote
 	rf.currentTerm += 1
 	voteReceived := 1
 	rf.voted = true
-	args := RequestVoteArgs{Term: rf.currentTerm, CandidateId: rf.me}
-	/*TODO:
-	lastLogIndex index of candidate’s last log entry (§5.4)
-	lastLogTerm term of candidate’s last log entry (§5.4)
-	*/
+	args := RequestVoteArgs{Term: rf.currentTerm, CandidateId: rf.me, LastLogIndex: rf.lastApplied, LastLogTerm: rf.logs[rf.lastApplied].Term}
 	for i := 0; i < len(rf.peers); i++ {
 		if rf.me == i {
 			continue
@@ -404,7 +409,6 @@ func (rf *Raft) StartElection() {
 		go func(counter int) {
 			reply := RequestVoteReply{}
 			if rf.peers[counter].Call("Raft.RequestVote", &args, &reply) {
-				DPrintf2A("Server %d : Server %d received heartbeat", rf.me, counter)
 				rf.mu.Lock()
 				defer rf.mu.Unlock()
 				if rf.currentTerm == args.Term && rf.role == CANDIDATE {
@@ -420,7 +424,7 @@ func (rf *Raft) StartElection() {
 							}
 						}
 					} else if reply.Term > rf.currentTerm {
-						rf.currentTerm, rf.role = reply.Term, FOLLOWER
+						rf.currentTerm, rf.role, rf.votedFor = reply.Term, FOLLOWER, -1
 					}
 				}
 
@@ -448,7 +452,7 @@ func (rf *Raft) ticker() {
 				//Enter Candidate State
 				rf.role = CANDIDATE
 				rf.StartElection()
-				rf.electionTimeOut.Reset(RamdomizedElection())
+				rf.electionTimeOut.Reset(RandomizedElection())
 			}
 			rf.mu.Unlock()
 		}
@@ -476,7 +480,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 		currentTerm:      0,
 		role:             FOLLOWER,
 		voted:            false,
-		electionTimeOut:  time.NewTimer(RamdomizedElection()),
+		electionTimeOut:  time.NewTimer(RandomizedElection()),
 		heartbeatTimeOut: time.NewTimer(StandardHeartBeat()),
 		//2B
 		//TODO: add last index term,
